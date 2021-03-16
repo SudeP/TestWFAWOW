@@ -36,6 +36,26 @@ public sealed class OutputCacheMC : OutputCacheAttribute
         base.OnResultExecuting(filterContext);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public class FileCacheProvider : OutputCacheProvider
 {
     public override object Add(string key, object entry, DateTime utcExpiry)
