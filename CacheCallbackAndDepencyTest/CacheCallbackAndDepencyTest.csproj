@@ -108,10 +108,8 @@
   <ItemGroup>
     <Content Include="Views\web.config" />
     <None Include="packages.config" />
-    <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Layout.cshtml" />
-    <Content Include="Views\Home\Action.cshtml" />
-    <Content Include="Views\Home\FrameMain.cshtml" />
+    <Content Include="Views\Home\TestPage.cshtml" />
     <Content Include="Views\Home\Frame1.cshtml" />
     <Content Include="Views\Home\Frame2.cshtml" />
     <Content Include="Views\Home\Frame3.cshtml" />
@@ -123,9 +121,7 @@
       <DependentUpon>Web.config</DependentUpon>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="App_Data\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

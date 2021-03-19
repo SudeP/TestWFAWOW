@@ -1,4 +1,4 @@
 ﻿<p>Frame 1</p>
 <p>@System.Guid.NewGuid()</p>
-<p>@System.DateTime.Now.ToString("dddd MMMM yyyy")</p>
-<p>@System.DateTime.Now.ToString("hh tt mm:ss.fff")</p>
+<p>@System.DateTime.Now.ToString("hh tt mm:ss.fff dddd MMMM yyyy")</p>
+<p>@Html.Raw(@"[OutputCache(Duration = 600, VaryByParam = ""*"")]")</p>
