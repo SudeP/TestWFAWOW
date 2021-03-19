@@ -4,6 +4,62 @@ using System.Runtime.Caching;
 using System.Threading.Tasks;
 using System.Web.Caching;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public class CustomOutputCacheProvider : OutputCacheProviderAsync
 {
     private readonly static MemoryCache _cache = MemoryCache.Default;

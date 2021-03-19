@@ -1,0 +1,101 @@
+﻿Get("a2/frame3")
+BeginExecute({System.Web.Routing.RequestContext},{Method = {Void HandleAsynchronousCompletion(System.IAsyncResult)}}, null)
+DisableAsyncSupport => false
+Initialize({System.Web.Routing.RequestContext})
+BeginExecuteCore({Method = {Void HandleAsynchronousCompletion(System.IAsyncResult)}},null)
+CreateTempDataProvider()
+CreateActionInvoker()
+OnAuthentication({System.Web.Mvc.Filters.AuthenticationContext})
+OnAuthorization({System.Web.Mvc.AuthorizationContext})
+OnActionExecuting({System.Web.Mvc.ActionExecutingContext})
+EndExecute({System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncVoid<System.Web.Mvc.Controller>})
+EndExecuteCore({System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncVoid<System.Web.Mvc.Controller.ExecuteCoreState>})
+View("Frame3","~/Views/Layout.cshtml",null)
+OnActionExecuted({System.Web.Mvc.ActionExecutedContext})
+OnAuthenticationChallenge({System.Web.Mvc.Filters.AuthenticationChallengeContext})
+OnResultExecuting({System.Web.Mvc.ResultExecutingContext})
+OnResultExecuted({System.Web.Mvc.ResultExecutedContext})
+Dispose(true)
+Add("a2/frame3",{System.Web.Caching.CachedVary},{31.12.9999 23:59:59})
+Set("a2/frame3HQFCDE",{System.Web.Caching.OutputCacheEntry},{19.03.2021 18:57:16})
+
+
+
+
+
+Get("a2/frame3")
+Get("a2/frame3HQFCDE")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Get("a2/frame3")
+BeginExecute({System.Web.Routing.RequestContext},{Method = {Void HandleAsynchronousCompletion(System.IAsyncResult)}}, null)
+DisableAsyncSupport => false
+Initialize({System.Web.Routing.RequestContext})
+BeginExecuteCore({Method = {Void HandleAsynchronousCompletion(System.IAsyncResult)}},null)
+CreateTempDataProvider()
+CreateActionInvoker()
+OnAuthentication({System.Web.Mvc.Filters.AuthenticationContext})
+OnAuthorization({System.Web.Mvc.AuthorizationContext})
+OnActionExecuting({System.Web.Mvc.ActionExecutingContext})
+
+	OnActionExecuting({System.Web.Mvc.ActionExecutingContext})
+
+EndExecute({System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncVoid<System.Web.Mvc.Controller>})
+EndExecuteCore({System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncVoid<System.Web.Mvc.Controller.ExecuteCoreState>})
+View("Frame3","~/Views/Layout.cshtml",null)
+
+	OnActionExecuted({System.Web.Mvc.ActionExecutedContext})
+
+OnActionExecuted({System.Web.Mvc.ActionExecutedContext})
+OnAuthenticationChallenge({System.Web.Mvc.Filters.AuthenticationChallengeContext})
+OnResultExecuting({System.Web.Mvc.ResultExecutingContext})
+
+	OnResultExecuting({System.Web.Mvc.ResultExecutingContext})
+	OnResultExecuted({System.Web.Mvc.ResultExecutedContext})
+
+OnResultExecuted({System.Web.Mvc.ResultExecutedContext})
+Dispose(true)
+Add("a2/frame3",{System.Web.Caching.CachedVary},{31.12.9999 23:59:59})
+Set("a2/frame3HQFCDE",{System.Web.Caching.OutputCacheEntry},{19.03.2021 18:57:16})
+
+
+
+
+
+Get("a2/frame3")
+Get("a2/frame3HQFCDE")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

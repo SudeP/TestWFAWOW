@@ -15,12 +15,9 @@ namespace WebApplication1.Helpers
         public DateTime Expires;
         public object Item;
     }
-
     public class FileCacheProvider : OutputCacheProvider
     {
         private string _cachePath;
-
-
         private string CachePath
         {
             get
