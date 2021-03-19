@@ -1,0 +1,24 @@
+﻿ASP.NET MVC 4 intercept all incoming requests
+		https://stackoverflow.com/questions/11726848/asp-net-mvc-4-intercept-all-incoming-requests/20489720
+		https://stackoverflow.com/a/11726897
+		https://stackoverflow.com/a/11726952
+				https://www.dotnetcurry.com/aspnet/126/aspnet-global-asax-events-methods
+		https://stackoverflow.com/a/20489720
+		https://stackoverflow.com/a/48443618
+---------------------------------------------------------------------------------------------------------------------------
+ASP.NET MVC 4 Custom Action Filters
+		https://docs.microsoft.com/en-us/aspnet/mvc/overview/older-versions/hands-on-labs/aspnet-mvc-4-custom-action-filters
+---------------------------------------------------------------------------------------------------------------------------
+5 Ways to do MVC Error Handling
+		https://stackify.com/aspnet-mvc-error-handling/
+---------------------------------------------------------------------------------------------------------------------------
+The following diagram shows how Sitecore MVC handles requests detail:
+		https://doc.sitecore.com/developers/91/sitecore-experience-manager/en/image/1604f45d040ff6.png
+---------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+

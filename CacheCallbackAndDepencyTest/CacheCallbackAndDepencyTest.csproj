@@ -94,13 +94,17 @@
   <ItemGroup>
     <Content Include="Docs\MVCController-Override-Steps.txt" />
     <Content Include="Docs\ProviderSteps.txt" />
+    <Content Include="Docs\Sources.txt" />
     <Content Include="Global.asax" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Classes\CustomFilterActionAttribute.cs" />
     <Compile Include="Classes\OutputCacheHybridServerProvider.cs" />
     <Compile Include="Classes\OutputCacheOverrideAttribute.cs" />
+    <Compile Include="Classes\TestProviders.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\OverrideController.cs" />
     <Compile Include="Global.asax.cs">
