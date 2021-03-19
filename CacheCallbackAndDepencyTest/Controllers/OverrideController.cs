@@ -8,47 +8,6 @@ using System.Web.Routing;
 
 namespace CacheCallbackAndDepencyTest.Controllers
 {
-    [System.AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
-    public sealed class OutputCacheOverrideAttribute : OutputCacheAttribute
-    {
-        public override bool Equals(object obj)
-        {
-            return base.Equals(obj);
-        }
-        public override string ToString()
-        {
-            return base.ToString();
-        }
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-        public override bool IsDefaultAttribute()
-        {
-            return base.IsDefaultAttribute();
-        }
-        public override bool Match(object obj)
-        {
-            return base.Match(obj);
-        }
-        public override void OnActionExecuted(ActionExecutedContext filterContext)
-        {
-            base.OnActionExecuted(filterContext);
-        }
-        public override void OnActionExecuting(ActionExecutingContext filterContext)
-        {
-            base.OnActionExecuting(filterContext);
-        }
-        public override void OnResultExecuted(ResultExecutedContext filterContext)
-        {
-            base.OnResultExecuted(filterContext);
-        }
-        public override void OnResultExecuting(ResultExecutingContext filterContext)
-        {
-            base.OnResultExecuting(filterContext);
-        }
-        public override object TypeId => base.TypeId;
-    }
     public class OverrideController : Controller
     {
         protected new ViewResult View([CallerMemberName] string name = null) => View(name, "~/Views/Layout.cshtml");
