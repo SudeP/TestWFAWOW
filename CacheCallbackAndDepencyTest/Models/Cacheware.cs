@@ -1,61 +1,154 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.Caching;
-using System.Web;
+using System.Threading.Tasks;
 using System.Web.Caching;
-using System.Web.Mvc;
 
-[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
-public sealed class OutputCacheMC : OutputCacheAttribute
+public class CustomOutputCacheProvider : OutputCacheProviderAsync
 {
-    public override void OnResultExecuting(ResultExecutingContext filterContext)
+    private readonly static MemoryCache _cache = MemoryCache.Default;
+
+    /// <summary>
+    /// Asynchronously inserts the specified entry into the output cache.
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="entry"></param>
+    /// <param name="utcExpiry"></param>
+    /// <returns></returns>
+    public override Task<object> AddAsync(string key, object entry, DateTime utcExpiry)
     {
-        //ResultExecutingContext fc = filterContext;
+        //TODO:
+        //Replace with your own async data insertion mechanism.
+        DateTimeOffset expiration = (utcExpiry == Cache.NoAbsoluteExpiration) ? ObjectCache.InfiniteAbsoluteExpiration : utcExpiry;
+        return Task.FromResult(_cache.AddOrGetExisting(key, entry, expiration));
+    }
 
-        //bool skip = VaryByParam == "*" || string.IsNullOrEmpty(VaryByParam);
+    /// <summary>
+    /// Asynchronously returns a reference to the specified entry in the output cache.
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    public override Task<object> GetAsync(string key)
+    {
+        //TODO:
+        //Replace with your own aysnc data retrieve mechanism.
+        return Task.FromResult(_cache.Get(key));
+    }
 
-        //string[] filterParams = VaryByParam.Split(';');
+    /// <summary>
+    /// Asynchronously Inserts the specified entry into the output cache, overwriting the entry if it is already cached.
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="entry"></param>
+    /// <param name="utcExpiry"></param>
+    /// <returns></returns>
+    public override Task SetAsync(string key, object entry, DateTime utcExpiry)
+    {
+        //TODO:
+        //Replace with your own async insertion/overwriting mechanism.
+        DateTimeOffset expiration = (utcExpiry == Cache.NoAbsoluteExpiration) ? ObjectCache.InfiniteAbsoluteExpiration : utcExpiry;
+        _cache.Set(key, entry, expiration);
+        return Task.CompletedTask;
+    }
 
-        //string cacheKey = $"?cache=special";
+    /// <summary>
+    /// Asynchronously removes the specified entry from the output cache.
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    public override Task RemoveAsync(string key)
+    {
+        //TODO:
+        //Replace with your own async data removal mechanism.
+        _cache.Remove(key);
+        return Task.CompletedTask;
+    }
 
-        //foreach (string queryKey in fc.HttpContext.Request.QueryString)
-        //{
-        //    if (skip || filterParams.Contains(queryKey))
-        //    {
-        //        string queryValue = fc.HttpContext.Request.QueryString[queryKey];
-        //        cacheKey += $"&{queryKey}={queryValue}";
-        //    }
-        //}
-        //var vr = fc.Result as ViewResult;
+    /// <summary>
+    /// Returns a reference to the specified entry in the output cache.
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    public override object Get(string key)
+    {
+        //TODO:
+        //Replace with your own data retrieve mechanism.
+        return _cache.Get(key);
+    }
 
-        //fc.Result.ExecuteResult(fc.Controller.ControllerContext);
+    /// <summary>
+    /// Inserts the specified entry into the output cache.
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="entry"></param>
+    /// <param name="utcExpiry"></param>
+    /// <returns></returns>
+    public override object Add(string key, object entry, DateTime utcExpiry)
+    {
+        //TODO:
+        //Replace with your own data insertion mechanism.
+        DateTimeOffset expiration = (utcExpiry == Cache.NoAbsoluteExpiration) ? ObjectCache.InfiniteAbsoluteExpiration : utcExpiry;
+        return _cache.AddOrGetExisting(key, entry, expiration);
+    }
 
-        base.OnResultExecuting(filterContext);
+    /// <summary>
+    /// Inserts the specified entry into the output cache, overwriting the entry if it is already cached
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="entry"></param>
+    /// <param name="utcExpiry"></param>
+    public override void Set(string key, object entry, DateTime utcExpiry)
+    {
+        //TODO:
+        //Replace with your own insertion/overwriting mechanism.
+        DateTimeOffset expiration = (utcExpiry == Cache.NoAbsoluteExpiration) ? ObjectCache.InfiniteAbsoluteExpiration : utcExpiry;
+        _cache.Set(key, entry, expiration);
+    }
+
+    /// <summary>
+    /// Removes the specified entry from the output cache.
+    /// </summary>
+    /// <param name="key"></param>
+    public override void Remove(string key)
+    {
+        //TODO:
+        //Replace with your own data removal mechanism.
+        _cache.Remove(key);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+public class TestAsyncProvider : OutputCacheProviderAsync
+{
+    public override object Add(string key, object entry, DateTime utcExpiry)
+    {
+        return null;
+    }
+    public override Task<object> AddAsync(string key, object entry, DateTime utcExpiry)
+    {
+        return null;
+    }
+    public override object Get(string key)
+    {
+        return null;
+    }
+    public override Task<object> GetAsync(string key)
+    {
+        return null;
+    }
+    public override void Remove(string key)
+    {
+    }
+    public override Task RemoveAsync(string key)
+    {
+        return null;
+    }
+    public override void Set(string key, object entry, DateTime utcExpiry)
+    {
+    }
+    public override Task SetAsync(string key, object entry, DateTime utcExpiry)
+    {
+        return null;
+    }
+}
 public class FileCacheProvider : OutputCacheProvider
 {
     public override object Add(string key, object entry, DateTime utcExpiry)
@@ -94,27 +187,6 @@ public class FileCacheProvider : OutputCacheProvider
         );
     }
 }
-
-//wow
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 public static class MC
 {

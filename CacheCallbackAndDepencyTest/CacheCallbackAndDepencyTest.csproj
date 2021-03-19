@@ -43,6 +43,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.AspNet.OutputCache.OutputCacheModuleAsync, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.OutputCache.OutputCacheModuleAsync.1.0.2\lib\Net462\Microsoft.AspNet.OutputCache.OutputCacheModuleAsync.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Web.DynamicData" />
@@ -99,6 +102,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Cacheware.cs" />
+    <Compile Include="Models\myProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -107,6 +111,11 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Layout.cshtml" />
     <Content Include="Views\Home\Action.cshtml" />
+    <Content Include="Views\Home\FrameMain.cshtml" />
+    <Content Include="Views\Home\Frame1.cshtml" />
+    <Content Include="Views\Home\Frame2.cshtml" />
+    <Content Include="Views\Home\Frame3.cshtml" />
+    <Content Include="Views\Home\Frame4.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

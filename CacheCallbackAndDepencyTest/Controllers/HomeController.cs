@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Web.Mvc;
 
 namespace CacheCallbackAndDepencyTest.Controllers
@@ -15,14 +16,18 @@ namespace CacheCallbackAndDepencyTest.Controllers
                 () => $"{DateTime.Now:HH:mm:ss}"
             ));
         }
-        public ActionResult Index()
+        public ActionResult Index() => View();
+        public ActionResult Action() => View();
+        public ActionResult FrameMain() => View();
+        public ActionResult Frame1() => View();
+        public ActionResult Frame2() => View();
+        public ActionResult Frame3() => View();
+        public ActionResult Frame4() => View();
+        protected new ViewResult View(bool usLayout = false, [CallerMemberName] string name = null)
         {
-            return View();
-        }
-        [OutputCacheMC(Duration = 5)]
-        public ActionResult Action()
-        {
-            return View();
+            var vr = View(name);
+            vr.MasterName = "~/Views/Layout.cshtml";
+            return vr;
         }
     }
 }
