@@ -403,52 +403,50 @@ public class CustOutputCacheModule : IHttpModule
             }
         }
 
+        if (utcExpires > DateTime.UtcNow)
+        {
 
+            object httpRawResponse = response.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Where(pi => pi.Name == "GetSnapshot").ToList().FirstOrDefault().Invoke(response, null);
 
+            var trpSetupKernelCaching = trp.GetMethod("SetupKernelCaching", bf);
+            if (trpSetupKernelCaching == null)
+                return;
 
+            string kernelCacheUrl = (string)trpSetupKernelCaching.Invoke(response, new object[] { null });
 
+            var tcv = cachedVary.GetType();
 
+            var tcvCachedVaryId = tcv.GetProperty("CachedVaryId", bf);
+            if (tcvCachedVaryId == null)
+                return;
 
+            Guid cachedVaryId = (Guid)tcvCachedVaryId.GetValue(cachedVary);
 
+            cachedVaryId = (cachedVary != null) ? cachedVaryId : Guid.Empty;
 
+            var tcrr = Type.GetType("System.Web.Caching.CachedRawResponse");
 
+            object cachedRawResponse = Activator.CreateInstance(tcrr, httpRawResponse, settings, kernelCacheUrl, cachedVaryId);
 
+            CacheDependency dep = (CacheDependency)response.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Where(pi => pi.Name == "CreateCacheDependencyForResponse").ToList().FirstOrDefault().Invoke(response, null);
 
+            try
+            {
+                var toc = Type.GetType("System.Web.Caching.OutputCache");
 
+                response.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Where(pi => pi.Name == "InsertResponse").ToList().FirstOrDefault().Invoke(response, new object[] { _key, cachedVary, keyRawResponse, cachedRawResponse, dep, utcExpires, slidingDelta });
+            }
+            catch
+            {
+                if (dep != null)
+                {
+                    dep.Dispose();
+                }
+                throw;
+            }
+        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        _key = null;
 
         //var httpRawResponse = response.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Where(pi => pi.Name == "GetSnapshot").ToList().FirstOrDefault().Invoke(response, null);
 
