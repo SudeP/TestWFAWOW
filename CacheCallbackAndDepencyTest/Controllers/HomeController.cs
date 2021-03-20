@@ -9,7 +9,7 @@ namespace CacheCallbackAndDepencyTest.Controllers
         public ActionResult Frame1() => View();
         [OutputCacheOverride(Duration = 1800, VaryByParam = "*")]
         public ActionResult Frame2() => View();
-        [OutputCacheOverride(Duration = 120)]
+        [OutputCacheOverride(Duration = 120, VaryByParam = "*")]
         public ActionResult Frame3() => View();
         [OutputCacheOverride(Duration = 9000, VaryByParam = "*")]
         public ActionResult Frame4() => View();

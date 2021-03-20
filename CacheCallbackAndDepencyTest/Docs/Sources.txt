@@ -22,3 +22,40 @@ The following diagram shows how Sitecore MVC handles requests detail:
 
 
 
+Application_BeginRequest
+Application_AuthenticateRequest
+Application_PostAuthenticateRequest
+Application_AuthorizeRequest
+Application_PostAuthorizeRequest
+										OuputCache.Get
+Application_ResolveRequestCache
+Application_PostResolveRequestCache
+Application_MapRequestHandler
+Application_PostMapRequestHandler
+Session_Start
+Application_AcquireRequestState
+Application_PostAcquireRequestState
+Application_PreRequestHandlerExecute
+Application_PostRequestHandlerExecute
+Application_ReleaseRequestState
+Application_PostReleaseRequestState
+Application_UpdateRequestCache
+Application_PostUpdateRequestCache
+Application_LogRequest
+Application_PostLogRequest
+Application_EndRequest
+Application_PreSendRequestContent
+Application_PreSendRequestHeaders
+Application_RequestCompleted
+
+
+
+
+
+
+
+
+
+
+
+

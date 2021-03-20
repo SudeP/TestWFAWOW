@@ -92,6 +92,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Docs\Debug Method Steps.txt" />
     <Content Include="Docs\MVCController-Override-Steps.txt" />
     <Content Include="Docs\ProviderSteps.txt" />
     <Content Include="Docs\Sources.txt" />
@@ -111,6 +112,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Cacheware.cs" />
+    <Compile Include="Models\Extensions.cs" />
     <Compile Include="Models\myProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

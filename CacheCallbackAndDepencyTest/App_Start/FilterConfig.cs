@@ -1,4 +1,6 @@
-﻿using System.Web.Mvc;
+﻿using System.Diagnostics;
+using System.Reflection;
+using System.Web.Mvc;
 
 namespace CacheCallbackAndDepencyTest
 {
@@ -6,6 +8,7 @@ namespace CacheCallbackAndDepencyTest
     {
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
+            Debug.WriteLine(MethodBase.GetCurrentMethod().GetFullName());
             filters.Add(new CustomFilterActionAttribute());
         }
     }

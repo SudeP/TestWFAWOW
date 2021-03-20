@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.Caching;
 using System.Web.Mvc;
 using System.Web.UI;
@@ -47,18 +49,22 @@ public sealed class OutputCacheOverrideAttribute : OutputCacheAttribute
 {
     public override void OnActionExecuted(ActionExecutedContext filterContext)
     {
+        Debug.WriteLine(MethodBase.GetCurrentMethod().GetFullName());
         base.OnActionExecuted(filterContext);
     }
     public override void OnActionExecuting(ActionExecutingContext filterContext)
     {
+        Debug.WriteLine(MethodBase.GetCurrentMethod().GetFullName());
         base.OnActionExecuting(filterContext);
     }
     public override void OnResultExecuted(ResultExecutedContext filterContext)
     {
+        Debug.WriteLine(MethodBase.GetCurrentMethod().GetFullName());
         base.OnResultExecuted(filterContext);
     }
     public override void OnResultExecuting(ResultExecutingContext filterContext)
     {
+        Debug.WriteLine(MethodBase.GetCurrentMethod().GetFullName());
         base.OnResultExecuting(filterContext);
     }
 }

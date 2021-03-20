@@ -1,0 +1,150 @@
+﻿1. Request (not Cached)
+
+MvcApplication Application_Start
+	RouteConfig RegisterRoutes
+		FilterConfig RegisterGlobalFilters
+MvcApplication Application_BeginRequest
+MvcApplication Application_AuthenticateRequest
+MvcApplication Application_PostAuthenticateRequest
+MvcApplication Application_AuthorizeRequest
+MvcApplication Application_PostAuthorizeRequest
+			OutputCacheHybridServerProvider Get
+MvcApplication Application_ResolveRequestCache
+MvcApplication Application_PostResolveRequestCache
+MvcApplication Application_MapRequestHandler
+MvcApplication Application_PostMapRequestHandler
+MvcApplication Session_Start
+MvcApplication Application_AcquireRequestState
+MvcApplication Application_PostAcquireRequestState
+MvcApplication Application_PreRequestHandlerExecute
+					OverrideController BeginExecute
+					OverrideController get_DisableAsyncSupport
+					OverrideController Initialize
+					OverrideController BeginExecuteCore
+					OverrideController CreateTempDataProvider
+					OverrideController CreateActionInvoker
+					OverrideController OnAuthentication
+					OverrideController OnAuthorization
+					OverrideController OnActionExecuting
+						CustomFilterActionAttribute System.Web.Mvc.IActionFilter.OnActionExecuting
+				OutputCacheOverrideAttribute OnActionExecuting
+					OverrideController EndExecute
+					OverrideController EndExecuteCore
+					OverrideController View
+					OverrideController View
+				OutputCacheOverrideAttribute OnActionExecuted
+						CustomFilterActionAttribute System.Web.Mvc.IActionFilter.OnActionExecuted
+					OverrideController OnActionExecuted
+					OverrideController OnAuthenticationChallenge
+					OverrideController OnResultExecuting
+						CustomFilterActionAttribute OnResultExecuting
+				OutputCacheOverrideAttribute OnResultExecuting
+				OutputCacheOverrideAttribute OnResultExecuted
+						CustomFilterActionAttribute OnResultExecuted
+					OverrideController OnResultExecuted
+					OverrideController Dispose
+MvcApplication Application_PostRequestHandlerExecute
+MvcApplication Application_ReleaseRequestState
+MvcApplication Application_PostReleaseRequestState
+			OutputCacheHybridServerProvider Add
+			OutputCacheHybridServerProvider Set
+MvcApplication Application_UpdateRequestCache
+MvcApplication Application_PostUpdateRequestCache
+MvcApplication Application_LogRequest
+MvcApplication Application_PostLogRequest
+MvcApplication Application_EndRequest
+MvcApplication Application_PreSendRequestContent
+MvcApplication Application_PreSendRequestHeaders
+MvcApplication Application_RequestCompleted
+
+
+
+
+
+
+2. Request (Cached)
+
+MvcApplication Application_BeginRequest
+MvcApplication Application_AuthenticateRequest
+MvcApplication Application_PostAuthenticateRequest
+MvcApplication Application_AuthorizeRequest
+MvcApplication Application_PostAuthorizeRequest
+	OutputCacheHybridServerProvider Get
+	OutputCacheHybridServerProvider Get
+MvcApplication Application_LogRequest
+MvcApplication Application_PostLogRequest
+MvcApplication Application_EndRequest
+MvcApplication Application_PreSendRequestContent
+MvcApplication Application_PreSendRequestHeaders
+MvcApplication Application_RequestCompleted
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

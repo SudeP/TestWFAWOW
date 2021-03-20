@@ -1,4 +1,6 @@
-﻿using System.Web.Mvc;
+﻿using System.Diagnostics;
+using System.Reflection;
+using System.Web.Mvc;
 using System.Web.Routing;
 
 namespace CacheCallbackAndDepencyTest
@@ -7,6 +9,7 @@ namespace CacheCallbackAndDepencyTest
     {
         public static void RegisterRoutes(RouteCollection routes)
         {
+            Debug.WriteLine(MethodBase.GetCurrentMethod().GetFullName());
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
             routes.MapRoute(
