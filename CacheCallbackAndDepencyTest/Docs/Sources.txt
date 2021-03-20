@@ -21,12 +21,15 @@ referencesource/System.Web/Cache/OutputCache.cs /
 Workshop - High Memory Site
 		https://4lowtherabbit.github.io/blogs/2019/03/HighMemSite/
 ---------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-
-
+A little understanding of OutputCacheProvider OutputCache
+		https://titanwolf.org/Network/Articles/Article?AID=2b87534c-f46c-4e2f-a35e-15f0cb2bb775#gsc.tab=0
+---------------------------------------------------------------------------------------------------------------------------
+OutputCache VaryByCustom cookie value
+		https://stackoverflow.com/a/46093875
+---------------------------------------------------------------------------------------------------------------------------
+OutputCacheProvider OutputCache的一点点认识
+		https://www.cnblogs.com/majiang/archive/2012/11/07/2758946.html
+---------------------------------------------------------------------------------------------------------------------------
 
 
 
