@@ -16,7 +16,9 @@ public class OutputCacheHybridServerProvider : OutputCacheProvider
     public override object Get(string key)
     {
         Debug.WriteLine(MethodBase.GetCurrentMethod().GetFullName());
-        return mc.Get(key);
+        var obj = mc.Get(key);
+        var v1 = obj.GetType();
+        return obj;
     }
     public override void Remove(string key)
     {
