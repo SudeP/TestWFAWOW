@@ -5,13 +5,13 @@ namespace CacheCallbackAndDepencyTest.Controllers
     public class HomeController : OverrideController
     {
         public ActionResult TestPage() => View();
-        [OutputCacheOverride(Duration = 600, VaryByParam = "*")]
+        [OutputCacheSpec(Duration = 600, VaryByParam = "*")]
         public ActionResult Frame1() => View();
-        [OutputCacheOverride(Duration = 1800, VaryByParam = "*")]
+        [OutputCacheSpec(Duration = 1800, VaryByParam = "*")]
         public ActionResult Frame2() => View();
-        [OutputCacheOverride(Duration = 120, VaryByParam = "*")]
+        [OutputCacheSpec(Duration = 120, VaryByParam = "*")]
         public ActionResult Frame3() => View();
-        [OutputCacheOverride(Duration = 9000, VaryByParam = "*")]
+        [OutputCacheSpec(Duration = 9000, VaryByParam = "*")]
         public ActionResult Frame4() => View();
     }
 }
