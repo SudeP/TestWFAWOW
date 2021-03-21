@@ -12,14 +12,52 @@ using System.Globalization;
 using System.Text;
 using System.Collections.Specialized;
 
+
+public class G
+{
+    public static BindingFlags bf = BindingFlags.CreateInstance
+| BindingFlags.DeclaredOnly
+| BindingFlags.Default
+| BindingFlags.ExactBinding
+| BindingFlags.FlattenHierarchy
+| BindingFlags.GetField
+| BindingFlags.GetProperty
+| BindingFlags.IgnoreCase
+| BindingFlags.IgnoreReturn
+| BindingFlags.Instance
+| BindingFlags.InvokeMethod
+| BindingFlags.NonPublic
+| BindingFlags.OptionalParamBinding
+| BindingFlags.Public
+| BindingFlags.PutDispProperty
+| BindingFlags.PutRefDispProperty
+| BindingFlags.SetField
+| BindingFlags.SetProperty
+| BindingFlags.Static
+| BindingFlags.SuppressChangeType;
+}
+
 public class OutputCacheHybridServerProvider : OutputCacheProvider
 {
     readonly MemoryCache mc = MemoryCache.Default;
+    object cvi;
     public override object Add(string key, object entry, DateTime utcExpiry)
     {
         Debug.WriteLine(MethodBase.GetCurrentMethod().GetFullName());
-        mc.Add(key, entry, utcExpiry);
-        return entry;
+
+        //Type tcv = entry.GetType();
+        //cvi = tcv.GetProperty("CachedVaryId", G.bf).GetValue(entry);
+
+        object @new = null;
+
+        var old = mc.Get(key);
+        if (old == null)
+        {
+            @new = entry;
+            mc.Set(key, entry, utcExpiry);
+        }
+
+        return @new ?? old;
     }
     public override object Get(string key)
     {
@@ -35,6 +73,10 @@ public class OutputCacheHybridServerProvider : OutputCacheProvider
     public override void Set(string key, object entry, DateTime utcExpiry)
     {
         Debug.WriteLine(MethodBase.GetCurrentMethod().GetFullName());
+
+        //Type toce = entry.GetType();
+        //toce.GetField("_cachedVaryId", G.bf).SetValue(entry, cvi);
+
         mc.Set(key, entry, utcExpiry);
     }
 }
