@@ -9,6 +9,8 @@ using System.Web.Caching;
 using System.Collections.Generic;
 using System.Collections;
 using System.Globalization;
+using System.Text;
+using System.Collections.Specialized;
 
 public class OutputCacheHybridServerProvider : OutputCacheProvider
 {
@@ -57,17 +59,113 @@ public class CustOutputCacheModule : IHttpModule
     string _key;
     private string key => HttpContext.Current.Request.RawUrl;
     private OutputCacheProvider provider => OutputCache.Providers[OutputCache.DefaultProviderName];
-    void OnEnter(object sender, EventArgs e)
+    void OnEnter(object httpApplication, EventArgs eventArgs)
     {
-        //var v1 = typeof(OutputCache);
-        //var methods = v1.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-        //HttpApplication app = (HttpApplication)sender;
-        //string data = (string)provider.Get(key);
-        //if (data != null)
-        //{
-        //    app.Response.Write(data);
-        //    app.CompleteRequest();
-        //}
+        HttpApplication ha;
+        HttpContext context;
+        string key;
+        HttpRequest request;
+        HttpResponse response;
+        Object item;
+        object cachedRawResponse;
+        object settings;
+        int i, n;
+        bool sendBody;
+        HttpValidationStatus validationStatus, validationStatusFinal;
+        object callbackInfo;
+        string ifModifiedSinceHeader;
+        DateTime utcIfModifiedSince;
+        string etag;
+        string[] etags;
+        int send304;
+        string cacheControl;
+        string[] cacheDirectives = null;
+        string pragma;
+        string[] pragmaDirectives = null;
+        string directive;
+        int maxage;
+        int minfresh;
+        int age;
+        int fresh;
+        bool hasValidationPolicy;
+        object cachedVary;
+        object rawResponse;
+
+        ha = (HttpApplication)httpApplication;
+        context = ha.Context;
+        request = context.Request;
+        response = context.Response;
+
+        Type t = Type.GetType("System.Web.Caching.OutputCacheModule");
+        Type tap = ha.GetType();
+        Type tcx = context.GetType();
+        Type trp = response.GetType();
+        Type trq = request.GetType();
+
+        BindingFlags bf = BindingFlags.CreateInstance
+            | BindingFlags.DeclaredOnly
+            | BindingFlags.Default
+            | BindingFlags.ExactBinding
+            | BindingFlags.FlattenHierarchy
+            | BindingFlags.GetField
+            | BindingFlags.GetProperty
+            | BindingFlags.IgnoreCase
+            | BindingFlags.IgnoreReturn
+            | BindingFlags.Instance
+            | BindingFlags.InvokeMethod
+            | BindingFlags.NonPublic
+            | BindingFlags.OptionalParamBinding
+            | BindingFlags.Public
+            | BindingFlags.PutDispProperty
+            | BindingFlags.PutRefDispProperty
+            | BindingFlags.SetField
+            | BindingFlags.SetProperty
+            | BindingFlags.Static
+            | BindingFlags.SuppressChangeType;
+
+        var tCreateOutputCachedItemKey = t.GetMethods(bf).FirstOrDefault(m => m.Name == "CreateOutputCachedItemKey" && m.GetParameters().Length == 2);
+        if (tCreateOutputCachedItemKey is null)
+            return;
+
+        string cocik(params object[] vs) => (string)tCreateOutputCachedItemKey.Invoke(this, vs);
+
+
+        if (request.HttpMethod != "POST"
+            && request.HttpMethod != "GET"
+            && request.HttpMethod != "HEAD")
+            return;
+
+        _key = key = cocik(context, null);
+
+        cachedVary = provider.Get(key);
+
+        if (cachedVary == null)
+            return;
+
+        Type tcv = cachedVary.GetType();
+
+        if (cachedVary != null)
+        {
+            key = cocik(context, cachedVary);
+
+            if (key == null)
+                return;
+
+            var tcv_contentEncodings = tcv.GetField("_contentEncodings", bf);
+            if (tcv_contentEncodings != null)
+            {
+                string[] _contentEncodings = (string[])tcv_contentEncodings.GetValue(cachedVary);
+
+                if (_contentEncodings == null)
+                {
+                    item = provider.Get(key);
+                }
+                else
+                {
+
+                }
+            }
+        }
     }
     void OnLeave(object httpApplication, EventArgs eventArgs)
     {
@@ -94,7 +192,7 @@ public class CustOutputCacheModule : IHttpModule
         cache = response.Cache;
         cacheable = false;
 
-        Type t = GetType();
+        Type t = Type.GetType("System.Web.Caching.OutputCacheModule");
         Type tap = ha.GetType();
         Type tcx = context.GetType();
         Type trp = response.GetType();
@@ -121,6 +219,12 @@ public class CustOutputCacheModule : IHttpModule
             | BindingFlags.SetProperty
             | BindingFlags.Static
             | BindingFlags.SuppressChangeType;
+
+        var tCreateOutputCachedItemKey = t.GetMethods(bf).FirstOrDefault(m => m.Name == "CreateOutputCachedItemKey" && m.GetParameters().Length == 2);
+        if (tCreateOutputCachedItemKey is null)
+            return;
+
+        string cocik(params object[] vs) => (string)tCreateOutputCachedItemKey.Invoke(this, vs);
 
         do
         {
@@ -270,12 +374,6 @@ public class CustOutputCacheModule : IHttpModule
 
             varyByParams = (string[])tstVaryByParams.GetValue(settings);
         }
-
-        var tCreateOutputCachedItemKey = t.GetMethods(bf).FirstOrDefault(m => m.Name == "CreateOutputCachedItemKey" && m.GetParameters().Length == 2);
-        if (tCreateOutputCachedItemKey is null)
-            return;
-
-        string cocik(params object[] vs) => (string)tCreateOutputCachedItemKey.Invoke(this, vs);
 
         if (_key == null)
             _key = cocik(context, null);
@@ -447,94 +545,5 @@ public class CustOutputCacheModule : IHttpModule
         }
 
         _key = null;
-
-        //var httpRawResponse = response.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Where(pi => pi.Name == "GetSnapshot").ToList().FirstOrDefault().Invoke(response, null);
-
-
-        //var buffersT = httpRawResponse.GetType().GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Where(pi => pi.Name == "Buffers").ToList().FirstOrDefault().GetValue(httpRawResponse);
-
-
-        //List<ResponseElement> responseElements = null;
-        //ArrayList buffers = (ArrayList)buffersT;
-        //var count = (buffers != null) ? buffers.Count : 0;
-        //for (int i = 0; i < count; i++)
-        //{
-        //    if (responseElements == null)
-        //    {
-        //        responseElements = new List<ResponseElement>(count);
-        //    }
-        //    var elem = buffers[i];
-        //    if (elem != null)
-        //    {
-        //        var et = elem.GetType();
-        //        if (et != null)
-        //        {
-        //            var etn = et.Name;
-        //            var em = et.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).ToList();
-        //            var ef = et.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).ToList();
-        //            var ep = et.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).ToList();
-        //            if (etn == "HttpFileResponseElement")
-        //            {
-        //                var fileName = ep.FirstOrDefault(p => p.Name == "FileName");
-        //                var fileNameVal = (string)fileName.GetValue(elem);
-        //                var offset = ep.FirstOrDefault(p => p.Name == "Offset");
-        //                var offsetVal = (long)offset.GetValue(elem);
-        //                var getSize = em.FirstOrDefault(m => m.Name == "GetSize");
-
-        //                responseElements.Add(new FileResponseElement(fileNameVal, offsetVal, (long)getSize.Invoke(elem, null)));
-        //            }
-        //            else if (etn == "HttpSubstBlockResponseElement")
-        //            {
-
-        //                var callback = ep.FirstOrDefault(p => p.Name == "Callback");
-        //                var callbackVal = (HttpResponseSubstitutionCallback)callback.GetValue(elem);
-
-        //                responseElements.Add(new SubstitutionResponseElement(callbackVal));
-        //            }
-        //            else
-        //            {
-        //                var getBytes = em.FirstOrDefault(m => m.Name == "System.Web.IHttpResponseElement.GetBytes");
-
-        //                byte[] b = (byte[])getBytes.Invoke(elem, null);
-        //                long length = (b != null) ? b.Length : 0;
-        //                responseElements.Add(new MemoryResponseElement(b, length));
-        //            }
-        //        }
-        //    }
-        //}
-
-        ////var httpRawResponse = response.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Where(pi => pi.Name == "UseSnapshot").ToList().FirstOrDefault().Invoke(response, null);
-        ////var httpVerb = request.GetType().GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Where(pi => pi.Name == "HttpVerb").ToList().FirstOrDefault().GetValue(request);
-        ////int toInt = (int)httpVerb;
-        ////var sendBody = toInt != 4;
-
-
-
-
-        //string data = (string)provider.Get(key);
-        //if (data == null)
-        //{
-        //    var o = app.Response.Output;
-        //    if (o != null)
-        //    {
-        //        var ot = o.GetType();
-        //        if (ot != null)
-        //        {
-        //            var cbp = ot.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance).Where(pi => pi.Name == "CharBuffer").ToList().FirstOrDefault();
-        //            if (cbp != null)
-        //            {
-        //                var cb = cbp.GetValue(o);
-        //                if (cb != null)
-        //                {
-        //                    char[] vs = (char[])cb;
-        //                    if (vs != null)
-        //                    {
-        //                        string htm = new string(vs);
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
     }
 }
