@@ -11,7 +11,7 @@ namespace CacheCallbackAndDepencyTest.Controllers
         public ActionResult Frame2() => View();
         [OutputCacheSpec(Duration = 120, VaryByParam = "*")]
         public ActionResult Frame3() => View();
-        [OutputCacheSpec(Duration = 9000, VaryByParam = "*")]
+        [OutputCacheSpec(Duration = 10, VaryByParam = "*")]
         public ActionResult Frame4() => View();
     }
 }
