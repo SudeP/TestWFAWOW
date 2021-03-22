@@ -1,22 +1,37 @@
 ﻿using System;
-using System.Web;
 
 namespace HybridServer
 {
+    [Serializable]
     internal class CacheSettings
     {
-        internal CacheSettings(string filePath, DateTime utcExpiry)
+        internal CacheSettings(string key, object outputCacheEntry, DateTime utcExpiry, SettingsJson parentSettingsJson) => Update(key, outputCacheEntry, utcExpiry, parentSettingsJson);
+        internal CacheSettings Update(string key, object outputCacheEntry, DateTime utcExpiry, SettingsJson parentSettingsJson)
         {
-            HttpRequest request = HttpContext.Current.Request;
-            OriginalString = request.Url.OriginalString;
-            RawUrl = request.RawUrl;
-            FilePath = filePath;
+            Key = key;
             UtcExpiry = utcExpiry;
+            OutputCacheEntry = outputCacheEntry;
+
+            Guid = (Guid)OutputCacheEntry.GetType()
+                .GetField("_cachedVaryId", Statics.bf)
+                .GetValue(OutputCacheEntry);
+
+            Uri = Statics.Request.Url;
+            HttpMethod = Statics.Request.HttpMethod;
+
+            settingsJson = parentSettingsJson;
+            PhysicalPath = IOUtility.PathCombine(settingsJson.PhysicalPath, IOUtility.GuidFileName(Guid));
+
+            return this;
         }
-        internal string OriginalString { get; }
-        internal string RawUrl { get; }
-        internal string FilePath { get; }
-        internal DateTime UtcExpiry { get; }
-        internal Guid Guid { get; }
+        [NonSerialized]
+        private SettingsJson settingsJson;
+        internal string PhysicalPath { get; private set; }
+        internal Uri Uri { get; private set; }
+        internal string HttpMethod { get; private set; }
+        internal object OutputCacheEntry { get; private set; }
+        internal string Key { get; private set; }
+        internal DateTime UtcExpiry { get; private set; }
+        internal Guid Guid { get; private set; }
     }
 }
