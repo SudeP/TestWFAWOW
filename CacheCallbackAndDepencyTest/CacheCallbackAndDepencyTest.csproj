@@ -111,6 +111,14 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Latest\CacheExtended.cs" />
+    <Compile Include="Latest\CacheSettings.cs" />
+    <Compile Include="Latest\LimitedConcurrencyLevelTaskScheduler.cs" />
+    <Compile Include="Latest\OutputCacheHybridServerProvider.cs" />
+    <Compile Include="Latest\QueueTasker.cs" />
+    <Compile Include="Latest\SettingsJson.cs" />
+    <Compile Include="Latest\Statics.cs" />
+    <Compile Include="Latest\Utility.cs" />
     <Compile Include="Models\Cacheware.cs" />
     <Compile Include="Models\Extensions.cs" />
     <Compile Include="Models\myProvider.cs" />
