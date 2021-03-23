@@ -2,7 +2,7 @@
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-	<LangVersion>8.0</LangVersion>
+    <LangVersion>8.0</LangVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>
@@ -112,12 +112,12 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Latest\CacheExtended.cs" />
-    <Compile Include="Latest\CacheSettings.cs" />
+    <Compile Include="Latest\HSCacheExtended.cs" />
+    <Compile Include="Latest\HSCache.cs" />
     <Compile Include="Latest\LimitedConcurrencyLevelTaskScheduler.cs" />
     <Compile Include="Latest\OutputCacheHybridServerProvider.cs" />
     <Compile Include="Latest\QueueTasker.cs" />
-    <Compile Include="Latest\SettingsJson.cs" />
+    <Compile Include="Latest\HSSettings.cs" />
     <Compile Include="Latest\Statics.cs" />
     <Compile Include="Latest\Utility.cs" />
     <Compile Include="Models\Cacheware.cs" />

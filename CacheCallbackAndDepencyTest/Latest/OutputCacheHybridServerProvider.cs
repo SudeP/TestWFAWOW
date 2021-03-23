@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.Caching;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Caching;
@@ -16,7 +15,7 @@ namespace HybridServer
                 {
                     do
                     {
-                        KeyValuePair<string, SettingsJson>[] vs = Statics.settingsJsons.ToArray();
+                        KeyValuePair<string, HSSettings>[] vs = Statics.HSSettings.ToArray();
 
                         for (int i = 0; i < vs.Length; i++)
                         {
@@ -33,54 +32,54 @@ namespace HybridServer
         }
         public override object Add(string key, object entry, DateTime utcExpiry)
         {
-            SettingsJson settingsJson = Statics.settingsJsons.AddOrUpdate(
+            HSSettings hSSettings = Statics.HSSettings.AddOrUpdate(
                 key,
-                _ => new SettingsJson(key, entry),
-                (_, oldSettingsJson) => oldSettingsJson.CachedVary != null ? oldSettingsJson : oldSettingsJson.Update(key, entry));
+                _ => new HSSettings(key, entry),
+                (_, oldHSSettings) => oldHSSettings.CachedVary != null ? oldHSSettings : oldHSSettings.Update(key, entry));
 
-            return settingsJson.CachedVary;
+            return hSSettings.CachedVary;
         }
         public override object Get(string key)
         {
             if (ProviderUtility.IsFirstPick(key))
             {
-                SettingsJson settingsJson = Statics.settingsJsons.GetOrAdd(
+                HSSettings hSSettings = Statics.HSSettings.GetOrAdd(
                     key,
-                    k => new SettingsJson(k, null));
+                    k => new HSSettings(k, null));
 
-                return settingsJson.CachedVary;
+                return hSSettings.CachedVary;
             }
             else
             {
                 object outputCacheEntry = null;
 
-                if (Statics.settingsJsons.TryGetValue(ProviderUtility.Impure2Pure(key), out SettingsJson settingsJson))
-                    if (settingsJson.CacheSettings.TryGetValue(key, out CacheSettings cacheSettings) && cacheSettings.UtcExpiry > DateTime.UtcNow)
-                        outputCacheEntry = cacheSettings.OutputCacheEntry;
+                if (Statics.HSSettings.TryGetValue(ProviderUtility.Impure2Pure(key), out HSSettings hSSettings))
+                    if (hSSettings.HSCache.TryGetValue(key, out HSCache hSCache) && hSCache.UtcExpiry > DateTime.UtcNow)
+                        outputCacheEntry = hSCache.OutputCacheEntry;
 
                 return outputCacheEntry;
             }
         }
         public override void Remove(string key)
         {
-            if (!ProviderUtility.IsFirstPick(key) && Statics.settingsJsons.TryGetValue(ProviderUtility.Impure2Pure(key), out SettingsJson settingsJson))
-                settingsJson.TryRemove(key);
+            if (!ProviderUtility.IsFirstPick(key) && Statics.HSSettings.TryGetValue(ProviderUtility.Impure2Pure(key), out HSSettings hSSettings))
+                hSSettings.TryRemove(key);
         }
         public override void Set(string key, object entry, DateTime utcExpiry)
         {
-            if (Statics.settingsJsons.TryGetValue(ProviderUtility.Impure2Pure(key), out SettingsJson settingsJson))
+            if (Statics.HSSettings.TryGetValue(ProviderUtility.Impure2Pure(key), out HSSettings hSSettings))
             {
-                settingsJson.QueueTasker.Add(() =>
+                hSSettings.QueueTasker.Add(() =>
                 {
-                    if (settingsJson.CacheSettings.TryGetValue(key, out CacheSettings cacheSettings) && cacheSettings.UtcExpiry > DateTime.UtcNow)
+                    if (hSSettings.HSCache.TryGetValue(key, out HSCache hSCache) && hSCache.UtcExpiry > DateTime.UtcNow)
                         return;
 
-                    cacheSettings = settingsJson.AddOrUpdate(
+                    hSCache = hSSettings.AddOrUpdate(
                         key,
-                        _ => new CacheSettings(key, entry, utcExpiry, settingsJson),
-                        (_, oldCacheSettings) => oldCacheSettings.UtcExpiry < DateTime.UtcNow ? oldCacheSettings : oldCacheSettings.Update(key, entry, utcExpiry, settingsJson));
+                        _ => new HSCache(key, entry, utcExpiry, hSSettings),
+                        (_, oldHSCache) => oldHSCache.UtcExpiry < DateTime.UtcNow ? oldHSCache : oldHSCache.Update(key, entry, utcExpiry, hSSettings));
 
-                    IOUtility.Serialize(cacheSettings.PhysicalPath, cacheSettings.OutputCacheEntry);
+                    IOUtility.Serialize(hSCache.PhysicalPath, hSCache.OutputCacheEntry);
                 });
             }
         }

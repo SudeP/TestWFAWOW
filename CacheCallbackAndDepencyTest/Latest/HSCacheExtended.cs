@@ -4,7 +4,7 @@ using System.Runtime.Caching;
 
 namespace HybridServer
 {
-    public static class CacheExtended
+    public static class HSCacheExtended
     {
         public static MemoryCache CreateSpecial(string name, byte periodSecond)
         {

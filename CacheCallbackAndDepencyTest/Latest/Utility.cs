@@ -4,6 +4,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace HybridServer
 {
@@ -40,6 +42,9 @@ namespace HybridServer
         }
         internal static T Deserialize<T>(string filePath)
         {
+            if (!File.Exists(filePath))
+                return default;
+
             FileStream fileStream = null;
             try
             {
@@ -73,6 +78,19 @@ namespace HybridServer
         internal static string PathMap(params string[] vs) => Statics.Server.MapPath(Path.Combine(vs));
         internal static string PathCombine(params string[] vs) => Path.Combine(vs);
         internal static string CreateFileName() => Guid.NewGuid().ToString() + Statics.defaultFileExtesion;
+        internal static string KeyCrypte(string @string)
+        {
+            var provider = new MD5CryptoServiceProvider();
+            var bytes = Encoding.UTF8.GetBytes(@string);
+            var builder = new StringBuilder();
+
+            bytes = provider.ComputeHash(bytes);
+
+            foreach (var b in bytes)
+                builder.Append(b.ToString("x2").ToLower());
+
+            return builder.ToString();
+        }
     }
     internal class ProviderUtility
     {

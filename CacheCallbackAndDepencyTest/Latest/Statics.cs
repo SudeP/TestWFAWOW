@@ -12,11 +12,9 @@ namespace HybridServer
         internal const int oneMilliSecond = 1000;
         internal const int oneMinute = 60 * oneMilliSecond;
         internal const string defaultFileExtesion = ".hsf";
-        internal const string defaultCacheRegionName = "__cacheFiles";
-        internal const string defaultSettingsJsonFileName = "settings" + defaultFileExtesion;
-        internal const string defaultControllerFolderName = "__unNamedController";
-        internal const string defaultActionFolderName = "__unNamedAction";
-        internal static readonly ConcurrentDictionary<string, SettingsJson> settingsJsons = new ConcurrentDictionary<string, SettingsJson>();
+        internal const string defaultSettingsFileName = "settings" + defaultFileExtesion;
+        internal const string defaultCacheRegion = "5aef4018-ffad-482a-b0aa-36852a5371c1";
+        internal static readonly ConcurrentDictionary<string, HSSettings> HSSettings = new ConcurrentDictionary<string, HSSettings>();
         internal static BindingFlags bf = BindingFlags.CreateInstance
             | BindingFlags.DeclaredOnly
             | BindingFlags.Default
