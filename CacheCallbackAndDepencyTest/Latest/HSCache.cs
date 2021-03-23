@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Web.Caching;
 
 namespace HybridServer
 {
@@ -11,11 +13,20 @@ namespace HybridServer
         {
             Key = key;
             UtcExpiry = utcExpiry;
-            OutputCacheEntry = outputCacheEntry;
+            if (outputCacheEntry is List<ResponseElement>)
+            {
+                OutputCacheEntry.GetType()
+                    .GetProperty("ResponseElements", Statics.bf)
+                    .SetValue(OutputCacheEntry, outputCacheEntry);
+            }
+            else
+            {
+                OutputCacheEntry = outputCacheEntry;
 
-            Guid = (Guid)OutputCacheEntry.GetType()
-                .GetField("_cachedVaryId", Statics.bf)
-                .GetValue(OutputCacheEntry);
+                Guid = (Guid)OutputCacheEntry.GetType()
+                    .GetField("_cachedVaryId", Statics.bf)
+                    .GetValue(OutputCacheEntry);
+            }
 
             hSSettings = parentHSSettings;
 

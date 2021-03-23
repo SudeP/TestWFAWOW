@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
@@ -100,17 +103,69 @@ namespace HybridServer
         internal static string Impure2Pure(string impureKey) => string.Concat(impureKey.Split(new string[] { ToLower(Statics.Request.Path) }, StringSplitOptions.None).First(), ToLower(Statics.Request.Path));
         internal static bool IsFirstPick(string key) => key.Split(new string[] { ToLower(Statics.Request.Path) }, StringSplitOptions.None).Last().Length == 0;
         internal static string ToLower(string text) => CultureInfo.InvariantCulture.TextInfo.ToLower(text);
-        internal static void UseSnapShot(object oce)
+        internal static object GetSnapShot(HttpContext context)
         {
             var toc = typeof(OutputCache);
-            object crr = toc.GetMethods(Statics.bf)
-                .First(m => m.Name == "Convert" && m.ReturnParameter.ParameterType.Name == "CachedRawResponse")
-                .Invoke(null, new object[] { oce });
 
-            object raw = crr.GetType().GetField("_rawResponse", Statics.bf).GetValue(crr);
+            object httpRawResponse = context.Response.GetType()
+                .GetMethods(Statics.bf)
+                .Where(pi => pi.Name == "GetSnapshot")
+                .ToList()
+                .FirstOrDefault()
+                .Invoke(context.Response, null);
 
-            Type tr = Statics.Response.GetType();
-            tr.GetMethod("UseSnapShot", Statics.bf).Invoke(Statics.Response, new object[] { raw, true });
+            var buffersT = httpRawResponse.GetType().GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Where(pi => pi.Name == "Buffers").ToList().FirstOrDefault().GetValue(httpRawResponse);
+
+            List<ResponseElement> responseElements = null;
+            ArrayList buffers = (ArrayList)buffersT;
+            var count = (buffers != null) ? buffers.Count : 0;
+            for (int i = 0; i < count; i++)
+            {
+                if (responseElements == null)
+                {
+                    responseElements = new List<ResponseElement>(count);
+                }
+                var elem = buffers[i];
+                if (elem != null)
+                {
+                    var et = elem.GetType();
+                    if (et != null)
+                    {
+                        var etn = et.Name;
+                        var em = et.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).ToList();
+                        var ef = et.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).ToList();
+                        var ep = et.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).ToList();
+                        if (etn == "HttpFileResponseElement")
+                        {
+                            var fileName = ep.FirstOrDefault(p => p.Name == "FileName");
+                            var fileNameVal = (string)fileName.GetValue(elem);
+                            var offset = ep.FirstOrDefault(p => p.Name == "Offset");
+                            var offsetVal = (long)offset.GetValue(elem);
+                            var getSize = em.FirstOrDefault(m => m.Name == "GetSize");
+
+                            responseElements.Add(new FileResponseElement(fileNameVal, offsetVal, (long)getSize.Invoke(elem, null)));
+                        }
+                        else if (etn == "HttpSubstBlockResponseElement")
+                        {
+
+                            var callback = ep.FirstOrDefault(p => p.Name == "Callback");
+                            var callbackVal = (HttpResponseSubstitutionCallback)callback.GetValue(elem);
+
+                            responseElements.Add(new SubstitutionResponseElement(callbackVal));
+                        }
+                        else
+                        {
+                            var getBytes = em.FirstOrDefault(m => m.Name == "System.Web.IHttpResponseElement.GetBytes");
+
+                            byte[] b = (byte[])getBytes.Invoke(elem, null);
+                            long length = (b != null) ? b.Length : 0;
+                            responseElements.Add(new MemoryResponseElement(b, length));
+                        }
+                    }
+                }
+            }
+
+            return responseElements;
         }
     }
     public static class RouteUtils

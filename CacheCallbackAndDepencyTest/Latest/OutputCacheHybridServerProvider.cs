@@ -68,15 +68,25 @@ namespace HybridServer
                             outputCacheEntry = hSCache.OutputCacheEntry;
                         else
                         {
-                            RouteData routeData = RouteUtils.GetRouteDataByUrl(HttpContext.Current.Request.AppRelativeCurrentExecutionFilePath);
+                            Task.Factory.StartNew((context) =>
+                            {
+                                HttpContext copied = (HttpContext)context;
 
-                            var factory = DependencyResolver.Current.GetService<IControllerFactory>() ?? new DefaultControllerFactory();
-                            Controller controller = (Controller)factory.CreateController(HttpContext.Current.Request.RequestContext, routeData.Values["controller"].ToString());
+                                hSSettings.QueueTasker.Add(() =>
+                                {
+                                    RouteData routeData = RouteUtils.GetRouteDataByUrl(copied.Request.AppRelativeCurrentExecutionFilePath);
+
+                                    var factory = DependencyResolver.Current.GetService<IControllerFactory>() ?? new DefaultControllerFactory();
+                                    Controller controller = (Controller)factory.CreateController(copied.Request.RequestContext, routeData.Values["controller"].ToString());
 
 
-                            ControllerContext newContext = new ControllerContext(new HttpContextWrapper(HttpContext.Current), routeData, controller);
-                            controller.ControllerContext = newContext;
-                            controller.ActionInvoker.InvokeAction(controller.ControllerContext, routeData.Values["action"].ToString());
+                                    ControllerContext newContext = new ControllerContext(new HttpContextWrapper(copied), routeData, controller);
+                                    controller.ControllerContext = newContext;
+                                    controller.ActionInvoker.InvokeAction(controller.ControllerContext, routeData.Values["action"].ToString());
+
+                                    Set(key, ProviderUtility.GetSnapShot(copied), DateTime.UtcNow.AddSeconds(10));
+                                });
+                            }, HttpContext.Current);
                         }
                     }
 
@@ -90,6 +100,10 @@ namespace HybridServer
         }
         public override void Set(string key, object entry, DateTime utcExpiry)
         {
+            if (entry is List<ResponseElement>)
+            {
+
+            }
             if (Statics.HSSettings.TryGetValue(ProviderUtility.Impure2Pure(key), out HSSettings hSSettings))
             {
                 hSSettings.QueueTasker.Add(() =>
