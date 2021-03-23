@@ -17,7 +17,6 @@ namespace CacheCallbackAndDepencyTest
                 url: "{action}",
                 defaults: new { controller = "Home", action = "TestPage" }
             );
-
         }
     }
 }

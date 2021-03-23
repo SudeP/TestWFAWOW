@@ -9,6 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Caching;
+using System.Web.Mvc;
+using System.Web.Routing;
 
 namespace HybridServer
 {
@@ -65,8 +67,17 @@ namespace HybridServer
                         if (hSCache.UtcExpiry > DateTime.UtcNow)
                             outputCacheEntry = hSCache.OutputCacheEntry;
                         else
-                            ;
-                        //ProviderUtility.UseSnapShot(hSCache.OutputCacheEntry);
+                        {
+                            RouteData routeData = RouteUtils.GetRouteDataByUrl(HttpContext.Current.Request.AppRelativeCurrentExecutionFilePath);
+
+                            var factory = DependencyResolver.Current.GetService<IControllerFactory>() ?? new DefaultControllerFactory();
+                            Controller controller = (Controller)factory.CreateController(HttpContext.Current.Request.RequestContext, routeData.Values["controller"].ToString());
+
+
+                            ControllerContext newContext = new ControllerContext(new HttpContextWrapper(HttpContext.Current), routeData, controller);
+                            controller.ControllerContext = newContext;
+                            controller.ActionInvoker.InvokeAction(controller.ControllerContext, routeData.Values["action"].ToString());
+                        }
                     }
 
                 return outputCacheEntry;
@@ -89,7 +100,7 @@ namespace HybridServer
                     hSCache = hSSettings.AddOrUpdate(
                         key,
                         _ => new HSCache(key, entry, utcExpiry, hSSettings),
-                        (_, oldHSCache) => oldHSCache.UtcExpiry < DateTime.UtcNow ? oldHSCache : oldHSCache.Update(key, entry, utcExpiry, hSSettings));
+                        (_, oldHSCache) => oldHSCache.UtcExpiry > DateTime.UtcNow ? oldHSCache : oldHSCache.Update(key, entry, utcExpiry, hSSettings));
 
                     IOUtility.Serialize(hSCache.PhysicalPath, hSCache.OutputCacheEntry);
                 });

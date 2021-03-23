@@ -30,6 +30,25 @@ OutputCache VaryByCustom cookie value
 OutputCacheProvider OutputCache的一点点认识
 		https://www.cnblogs.com/majiang/archive/2012/11/07/2758946.html
 ---------------------------------------------------------------------------------------------------------------------------
+var factory = DependencyResolver.Current.GetService<IControllerFactory>() ?? new DefaultControllerFactory();
+TestController controller = factory.CreateController(this.ControllerContext.RequestContext, "Test") as TestController;
+
+RouteData route = new RouteData();
+route.Values.Add("action", "Test"); // ActionName, but it not required
+
+ControllerContext newContext = new ControllerContext(new HttpContextWrapper(System.Web.HttpContext.Current), route, controller);
+controller.ControllerContext = newContext;
+ActionResult result = controller.Test();
+---------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
 
 
 
