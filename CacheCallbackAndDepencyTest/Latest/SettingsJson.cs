@@ -36,13 +36,12 @@ namespace HybridServer
             controllerFileName ??= Statics.defaultControllerFolderName;
             actionFileName ??= Statics.defaultActionFolderName;
 
-            PathRoot = IOUtility.PathMap(Statics.defaultCacheRegionName, controllerFileName, actionFileName);
+            RootPath = IOUtility.PathMap(Statics.defaultCacheRegionName, controllerFileName, actionFileName);
 
+            if (!Directory.Exists(RootPath))
+                Directory.CreateDirectory(RootPath);
 
-            if (!Directory.Exists(PathRoot))
-                Directory.CreateDirectory(PathRoot);
-
-            PhysicalPath = IOUtility.PathCombine(PathRoot, Statics.defaultSettingsJsonFileName);
+            PhysicalPath = IOUtility.PathCombine(RootPath, Statics.defaultSettingsJsonFileName);
 
             SettingsJson settingsJson = IOUtility.Deserialize<SettingsJson>(PhysicalPath);
 
@@ -69,9 +68,21 @@ namespace HybridServer
             }
             return this;
         }
+        internal CacheSettings AddOrUpdate(string key, Func<string, CacheSettings> addValueFactory, Func<string, CacheSettings, CacheSettings> updateValueFactory)
+        {
+            isChange = true;
+            return CacheSettings.AddOrUpdate(key, addValueFactory, updateValueFactory);
+        }
+        internal bool TryRemove(string key)
+        {
+            isChange = true;
+            return CacheSettings.TryRemove(key, out _);
+        }
+        [NonSerialized]
+        internal bool isChange;
         [NonSerialized]
         internal QueueTasker QueueTasker;
-        internal string PathRoot { get; private set; }
+        internal string RootPath { get; private set; }
         internal string PhysicalPath { get; private set; }
         internal ConcurrentDictionary<string, CacheSettings> CacheSettings { get; set; }
         internal string Key { get; private set; }

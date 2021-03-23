@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Routing;
 
@@ -7,6 +8,9 @@ namespace HybridServer
 {
     internal static class Statics
     {
+        internal static Task Collector;
+        internal const int oneMilliSecond = 1000;
+        internal const int oneMinute = 60 * oneMilliSecond;
         internal const string defaultFileExtesion = ".hsf";
         internal const string defaultCacheRegionName = "__cacheFiles";
         internal const string defaultSettingsJsonFileName = "settings" + defaultFileExtesion;

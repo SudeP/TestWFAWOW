@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace HybridServer
 {
@@ -16,19 +17,21 @@ namespace HybridServer
                 .GetField("_cachedVaryId", Statics.bf)
                 .GetValue(OutputCacheEntry);
 
-            Uri = Statics.Request.Url;
-            HttpMethod = Statics.Request.HttpMethod;
-
             settingsJson = parentSettingsJson;
-            PhysicalPath = IOUtility.PathCombine(settingsJson.PhysicalPath, IOUtility.GuidFileName(Guid));
+
+            RootPath = IOUtility.PathCombine(settingsJson.RootPath, Guid.ToString());
+
+            if (!Directory.Exists(RootPath))
+                Directory.CreateDirectory(RootPath);
+
+            PhysicalPath = IOUtility.PathCombine(RootPath, IOUtility.CreateFileName());
 
             return this;
         }
         [NonSerialized]
         private SettingsJson settingsJson;
+        internal string RootPath { get; private set; }
         internal string PhysicalPath { get; private set; }
-        internal Uri Uri { get; private set; }
-        internal string HttpMethod { get; private set; }
         internal object OutputCacheEntry { get; private set; }
         internal string Key { get; private set; }
         internal DateTime UtcExpiry { get; private set; }

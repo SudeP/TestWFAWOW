@@ -11,9 +11,10 @@ namespace HybridServer
     {
         internal static bool Serialize(string filePath, object serializeObject)
         {
+            FileStream fileStream = null;
             try
             {
-                using FileStream fileStream = new FileStream(
+                fileStream = new FileStream(
                     filePath,
                     FileMode.OpenOrCreate,
                     FileAccess.Write);
@@ -26,8 +27,15 @@ namespace HybridServer
             }
             catch (Exception exception)
             {
+#if DEBUG
                 Trace.Fail(exception.ToString());
+#endif
                 return false;
+            }
+            finally
+            {
+                if (fileStream != null)
+                    fileStream.Dispose();
             }
         }
         internal static T Deserialize<T>(string filePath)
@@ -37,10 +45,10 @@ namespace HybridServer
             {
                 fileStream = new FileStream(
                     filePath,
-                    FileMode.OpenOrCreate,
+                    FileMode.Open,
                     FileAccess.Read);
 
-                if (fileStream.Length == 0)
+                if (!fileStream.CanRead)
                     return default;
 
                 BinaryFormatter binaryFormatter = new BinaryFormatter();
@@ -64,11 +72,11 @@ namespace HybridServer
         }
         internal static string PathMap(params string[] vs) => Statics.Server.MapPath(Path.Combine(vs));
         internal static string PathCombine(params string[] vs) => Path.Combine(vs);
-        internal static string GuidFileName(Guid guid) => guid.ToString() + Statics.defaultFileExtesion;
+        internal static string CreateFileName() => Guid.NewGuid().ToString() + Statics.defaultFileExtesion;
     }
     internal class ProviderUtility
     {
-        internal static string Impure2Pure(string impureKey) => IOUtility.PathCombine(impureKey.Split(new string[] { ToLower(Statics.Request.Path) }, StringSplitOptions.None).First(), Statics.Request.Path);
+        internal static string Impure2Pure(string impureKey) => string.Concat(impureKey.Split(new string[] { ToLower(Statics.Request.Path) }, StringSplitOptions.None).First(), ToLower(Statics.Request.Path));
         internal static bool IsFirstPick(string key) => key.Split(new string[] { ToLower(Statics.Request.Path) }, StringSplitOptions.None).Last().Length == 0;
         internal static string ToLower(string text) => CultureInfo.InvariantCulture.TextInfo.ToLower(text);
     }

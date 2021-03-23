@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Caching;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Caching;
 
 namespace HybridServer
@@ -8,7 +11,25 @@ namespace HybridServer
     {
         public OutputCacheHybridServerProvider()
         {
+            if (Statics.Collector == null)
+                Statics.Collector = Task.Factory.StartNew(() =>
+                {
+                    do
+                    {
+                        KeyValuePair<string, SettingsJson>[] vs = Statics.settingsJsons.ToArray();
 
+                        for (int i = 0; i < vs.Length; i++)
+                        {
+                            if (vs[i].Value.isChange)
+                            {
+                                vs[i].Value.isChange = false;
+
+                                IOUtility.Serialize(vs[i].Value.PhysicalPath, vs[i].Value);
+                            }
+                        }
+                        Thread.Sleep(Statics.oneMinute);
+                    } while (true);
+                });
         }
         public override object Add(string key, object entry, DateTime utcExpiry)
         {
@@ -43,7 +64,7 @@ namespace HybridServer
         public override void Remove(string key)
         {
             if (!ProviderUtility.IsFirstPick(key) && Statics.settingsJsons.TryGetValue(ProviderUtility.Impure2Pure(key), out SettingsJson settingsJson))
-                settingsJson.CacheSettings.TryRemove(key, out _);
+                settingsJson.TryRemove(key);
         }
         public override void Set(string key, object entry, DateTime utcExpiry)
         {
@@ -54,7 +75,7 @@ namespace HybridServer
                     if (settingsJson.CacheSettings.TryGetValue(key, out CacheSettings cacheSettings) && cacheSettings.UtcExpiry > DateTime.UtcNow)
                         return;
 
-                    cacheSettings = settingsJson.CacheSettings.AddOrUpdate(
+                    cacheSettings = settingsJson.AddOrUpdate(
                         key,
                         _ => new CacheSettings(key, entry, utcExpiry, settingsJson),
                         (_, oldCacheSettings) => oldCacheSettings.UtcExpiry < DateTime.UtcNow ? oldCacheSettings : oldCacheSettings.Update(key, entry, utcExpiry, settingsJson));
