@@ -12,6 +12,8 @@ namespace HybridServer
         internal SettingsJson(string key, object cachedVary) => Update(key, cachedVary);
         internal SettingsJson Update(string key, object cachedVary)
         {
+            if (QueueTasker != null)
+                GC.SuppressFinalize(QueueTasker);
             QueueTasker = new QueueTasker();
 
             string controllerFileName = string.Empty;
@@ -26,7 +28,9 @@ namespace HybridServer
             }
             catch (Exception exception)
             {
+#if DEBUG
                 Trace.Fail(exception.ToString());
+#endif
             }
 
             controllerFileName ??= Statics.defaultControllerFolderName;
@@ -65,10 +69,11 @@ namespace HybridServer
             }
             return this;
         }
+        [NonSerialized]
+        internal QueueTasker QueueTasker;
         internal string PathRoot { get; private set; }
         internal string PhysicalPath { get; private set; }
         internal ConcurrentDictionary<string, CacheSettings> CacheSettings { get; set; }
-        internal QueueTasker QueueTasker { get; private set; }
         internal string Key { get; private set; }
         internal object CachedVary { get; private set; }
         internal Guid Guid { get; private set; }

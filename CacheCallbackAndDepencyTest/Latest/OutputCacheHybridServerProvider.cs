@@ -6,7 +6,7 @@ namespace HybridServer
 {
     internal sealed class OutputCacheHybridServerProvider : OutputCacheProvider
     {
-        internal OutputCacheHybridServerProvider()
+        public OutputCacheHybridServerProvider()
         {
 
         }
@@ -14,7 +14,7 @@ namespace HybridServer
         {
             SettingsJson settingsJson = Statics.settingsJsons.AddOrUpdate(
                 key,
-                new SettingsJson(key, entry),
+                _ => new SettingsJson(key, entry),
                 (_, oldSettingsJson) => oldSettingsJson.CachedVary != null ? oldSettingsJson : oldSettingsJson.Update(key, entry));
 
             return settingsJson.CachedVary;
@@ -56,7 +56,7 @@ namespace HybridServer
 
                     cacheSettings = settingsJson.CacheSettings.AddOrUpdate(
                         key,
-                        new CacheSettings(key, entry, utcExpiry, settingsJson),
+                        _ => new CacheSettings(key, entry, utcExpiry, settingsJson),
                         (_, oldCacheSettings) => oldCacheSettings.UtcExpiry < DateTime.UtcNow ? oldCacheSettings : oldCacheSettings.Update(key, entry, utcExpiry, settingsJson));
 
                     IOUtility.Serialize(cacheSettings.PhysicalPath, cacheSettings.OutputCacheEntry);
