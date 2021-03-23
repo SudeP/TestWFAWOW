@@ -1,7 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Diagnostics;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Caching;
 
 namespace HybridServer
@@ -54,8 +60,14 @@ namespace HybridServer
                 object outputCacheEntry = null;
 
                 if (Statics.HSSettings.TryGetValue(ProviderUtility.Impure2Pure(key), out HSSettings hSSettings))
-                    if (hSSettings.HSCache.TryGetValue(key, out HSCache hSCache) && hSCache.UtcExpiry > DateTime.UtcNow)
-                        outputCacheEntry = hSCache.OutputCacheEntry;
+                    if (hSSettings.HSCache.TryGetValue(key, out HSCache hSCache))
+                    {
+                        if (hSCache.UtcExpiry > DateTime.UtcNow)
+                            outputCacheEntry = hSCache.OutputCacheEntry;
+                        else
+                            ;
+                        //ProviderUtility.UseSnapShot(hSCache.OutputCacheEntry);
+                    }
 
                 return outputCacheEntry;
             }

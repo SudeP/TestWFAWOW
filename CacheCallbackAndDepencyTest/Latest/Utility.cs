@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
+using System.Web.Caching;
 
 namespace HybridServer
 {
@@ -97,5 +98,17 @@ namespace HybridServer
         internal static string Impure2Pure(string impureKey) => string.Concat(impureKey.Split(new string[] { ToLower(Statics.Request.Path) }, StringSplitOptions.None).First(), ToLower(Statics.Request.Path));
         internal static bool IsFirstPick(string key) => key.Split(new string[] { ToLower(Statics.Request.Path) }, StringSplitOptions.None).Last().Length == 0;
         internal static string ToLower(string text) => CultureInfo.InvariantCulture.TextInfo.ToLower(text);
+        internal static void UseSnapShot(object oce)
+        {
+            var toc = typeof(OutputCache);
+            object crr = toc.GetMethods(Statics.bf)
+                .First(m => m.Name == "Convert" && m.ReturnParameter.ParameterType.Name == "CachedRawResponse")
+                .Invoke(null, new object[] { oce });
+
+            object raw = crr.GetType().GetField("_rawResponse", Statics.bf).GetValue(crr);
+
+            Type tr = Statics.Response.GetType();
+            tr.GetMethod("UseSnapShot", Statics.bf).Invoke(Statics.Response, new object[] { raw, true });
+        }
     }
 }
