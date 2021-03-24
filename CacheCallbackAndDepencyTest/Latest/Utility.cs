@@ -9,8 +9,11 @@ using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Caching;
+using System.Web.Mvc;
 using System.Web.Routing;
 
 namespace HybridServer
@@ -103,6 +106,71 @@ namespace HybridServer
         internal static string Impure2Pure(string impureKey) => string.Concat(impureKey.Split(new string[] { ToLower(Statics.Request.Path) }, StringSplitOptions.None).First(), ToLower(Statics.Request.Path));
         internal static bool IsFirstPick(string key) => key.Split(new string[] { ToLower(Statics.Request.Path) }, StringSplitOptions.None).Last().Length == 0;
         internal static string ToLower(string text) => CultureInfo.InvariantCulture.TextInfo.ToLower(text);
+        internal static void CollectorRun(int milliSecond)
+        {
+            if (Statics.Collector == null)
+                Statics.Collector = Task.Factory.StartNew(() =>
+                {
+                    do
+                    {
+                        KeyValuePair<string, HSSettings>[] vs = Statics.HSSettings.ToArray();
+
+                        for (int i = 0; i < vs.Length; i++)
+                        {
+                            if (vs[i].Value.isChange)
+                            {
+                                vs[i].Value.isChange = false;
+
+                                IOUtility.Serialize(vs[i].Value.PhysicalPath, vs[i].Value);
+                            }
+                        }
+                        Thread.Sleep(milliSecond);
+                    } while (true);
+                });
+        }
+        internal static Task<HttpContext> RequestClone()
+        {
+            return Task.Factory.StartNew((obj) =>
+            {
+                Uri uri = (Uri)obj;
+
+                HttpContext httpContext = new HttpContext(new HttpRequest(
+                    string.Empty,
+                    uri.AbsoluteUri,
+                    uri.Query), new HttpResponse(new StringWriter()));
+
+                HttpContext.Current = httpContext;
+
+                RouteData routeData = RouteUtils.GetRouteDataByUrl(
+                    httpContext
+                    .Request
+                    .AppRelativeCurrentExecutionFilePath);
+
+                Controller controller =
+                (Controller)(DependencyResolver.Current.GetService<IControllerFactory>() ?? new DefaultControllerFactory())
+                 .CreateController(
+                    httpContext.Request.RequestContext,
+                    routeData.Values["controller"].ToString());
+
+                controller.ControllerContext = new ControllerContext(
+                    new HttpContextWrapper(httpContext),
+                    routeData,
+                    controller);
+
+                httpContext.Response.GetType()
+                    .GetMethods(Statics.bf)
+                    .FirstOrDefault(m => m.Name == "InitResponseWriter")
+                    .Invoke(httpContext.Response, null);
+
+                controller
+                .ActionInvoker
+                .InvokeAction(
+                    controller.ControllerContext,
+                    routeData.Values["action"].ToString());
+
+                return httpContext;
+            }, new Uri(Statics.Request.Url.OriginalString));
+        }
         internal static object GetSnapShot(HttpContext context)
         {
             var toc = typeof(OutputCache);
@@ -164,7 +232,6 @@ namespace HybridServer
                     }
                 }
             }
-
             return responseElements;
         }
     }
