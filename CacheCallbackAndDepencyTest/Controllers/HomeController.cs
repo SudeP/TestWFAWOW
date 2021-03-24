@@ -9,14 +9,20 @@ namespace CacheCallbackAndDepencyTest.Controllers
         [OutputCache(Duration = 600, VaryByParam = "*")]
         public ActionResult Frame1() => View();
         [OutputCache(Duration = 10, VaryByParam = "*")]
+        public ActionResult Frame4() => View();
+
+
+
+
+
+
+        [OutputCacheSpec(Duration = 10, VaryByParam = "*")]
         public ActionResult Frame2()
         {
             Thread.Sleep(1000);
             return View();
         }
-        [OutputCache(Duration = 60000, VaryByParam = "*")]
+        [OutputCacheSpec(Duration = 10, VaryByParam = "id")]
         public ActionResult Frame3() => View();
-        [OutputCache(Duration = 10, VaryByParam = "*")]
-        public ActionResult Frame4() => View();
     }
 }

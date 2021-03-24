@@ -1,4 +1,7 @@
 ﻿using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Caching;
 
@@ -38,13 +41,36 @@ namespace HybridServer
                     if (hSCache.UtcExpiry < DateTime.UtcNow && !hSCache.IsReloding)
                     {
                         hSCache.IsReloding = true;
-                        ProviderUtility.RequestClone(httpContext)
-                            .ContinueWith((task) =>
-                            {
-                                httpContext = task.Result;
-                                Set(key, ProviderUtility.GetSnapShot(httpContext), httpContext.Response.Cache.GetExpires());
-                            });
+                        ProviderUtility
+                            .InvokeRequest(
+                                ReflectionUtility
+                                    .Bind(
+                                        httpContext,
+                                        ProviderUtility.EmptyContext(httpContext.Request.Url)))
+                                .ContinueWith((t) =>
+                                {
+                                    httpContext = t.Result;
+                                    Set(key, ProviderUtility.GetSnapShot(httpContext), httpContext.Response.Cache.GetExpires());
+                                });
                     }
+
+
+                    // RUNTIME DAKI PROJEDEN RESULTEXECINTDEKİ PROCESS METHODUNDAN EXCEPTION VEREBILECEK YERLERI BUL
+                    // RESPONSE METHODUYLA ALAKASINI BUL.
+                    // ÇÖZ VE BİTSİN
+
+                    //if (hSCache.UtcExpiry < DateTime.UtcNow && !hSCache.IsReloding)
+                    //{
+                    //    hSCache.IsReloding = true;
+                    //    ProviderUtility
+                    //        .InvokeRequest(
+                    //            ProviderUtility.CloneContext(httpContext))
+                    //        .ContinueWith((task) =>
+                    //        {
+                    //            httpContext = task.Result;
+                    //            Set(key, ProviderUtility.GetSnapShot(httpContext), httpContext.Response.Cache.GetExpires());
+                    //        });
+                    //}
                 }
                 return outputCacheEntry;
             }

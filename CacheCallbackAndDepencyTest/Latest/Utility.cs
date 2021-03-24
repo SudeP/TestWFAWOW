@@ -155,29 +155,35 @@ namespace HybridServer
                     } while (true);
                 });
         }
-        internal static Task<HttpContext> RequestClone(HttpContext httpContext)
-        {
-            return Task.Factory.StartNew((obj) =>
-            {
-                Uri uri = (Uri)obj;
-
-                HttpContext httpContext = new HttpContext(new HttpRequest(
+        internal static HttpContext EmptyContext(Uri uri) => new HttpContext(new HttpRequest(
                     string.Empty,
                     uri.AbsoluteUri,
                     uri.Query), new HttpResponse(new StringWriter()));
+        [Obsolete]
+        internal static HttpContext CloneContext(HttpContext httpContext) => new HttpContext(new HttpRequest(
+                    string.Empty,
+                    httpContext.Request.Url.AbsoluteUri,
+                    httpContext.Request.Url.Query), new HttpResponse(new StringWriter()));
+        internal static Task<HttpContext> InvokeRequest(HttpContext httpContext)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                
 
                 HttpContext.Current = httpContext;
 
-                RouteData routeData = RouteUtils.GetRouteDataByUrl(
+                RouteData routeData = RouteUtility.GetRouteDataByUrl(
                     httpContext
                     .Request
                     .AppRelativeCurrentExecutionFilePath);
 
-                Controller controller =
-                (Controller)(DependencyResolver.Current.GetService<IControllerFactory>() ?? new DefaultControllerFactory())
-                 .CreateController(
-                    httpContext.Request.RequestContext,
-                    routeData.Values["controller"].ToString());
+                Controller controller = (Controller)(
+                    DependencyResolver
+                    .Current
+                    .GetService<IControllerFactory>() ?? new DefaultControllerFactory())
+                        .CreateController(
+                            httpContext.Request.RequestContext,
+                            routeData.Values["controller"].ToString());
 
                 controller.ControllerContext = new ControllerContext(
                     new HttpContextWrapper(httpContext),
@@ -190,13 +196,13 @@ namespace HybridServer
                     .Invoke(httpContext.Response, null);
 
                 controller
-                .ActionInvoker
-                .InvokeAction(
-                    controller.ControllerContext,
-                    routeData.Values["action"].ToString());
+                    .ActionInvoker
+                    .InvokeAction(
+                        controller.ControllerContext,
+                        routeData.Values["action"].ToString());
 
                 return httpContext;
-            }, new Uri(httpContext.Request.Url.OriginalString));
+            });
         }
         internal static object GetSnapShot(HttpContext context)
         {
@@ -262,7 +268,50 @@ namespace HybridServer
             return responseElements;
         }
     }
-    public static class RouteUtils
+    internal static class ReflectionUtility
+    {
+        internal static T2 Bind<T1, T2>(this T1 from, T2 to)
+            where T1 : class
+            where T2 : class
+        {
+            Type fromType = from.GetType();
+
+            Type toType = to.GetType();
+
+            PropertyInfo[] toProperties = toType.GetProperties(Statics.bf);
+
+            foreach (PropertyInfo toProperty in toProperties)
+            {
+                PropertyInfo requestSettingsProperty = fromType.GetProperty(toProperty.Name);
+                if (requestSettingsProperty != null && requestSettingsProperty.PropertyType == toProperty.PropertyType)
+                    try
+                    {
+                        toProperty.SetValue(to, requestSettingsProperty.GetValue(from));
+                    }
+                    catch (Exception ex)
+                    {
+                    }
+            }
+
+            FieldInfo[] toFields = toType.GetFields(Statics.bf);
+
+            foreach (FieldInfo toField in toFields)
+            {
+                FieldInfo requestSettingsField = fromType.GetField(toField.Name, Statics.bf);
+                if (requestSettingsField != null && requestSettingsField.FieldType == toField.FieldType)
+                    try
+                    {
+                        toField.SetValue(to, requestSettingsField.GetValue(from));
+                    }
+                    catch (Exception ex)
+                    {
+                    }
+            }
+
+            return to;
+        }
+    }
+    public static class RouteUtility
     {
         public static RouteData GetRouteDataByUrl(string url)
         {
