@@ -1,7 +1,10 @@
-﻿using System;
+﻿using Moq;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
@@ -10,6 +13,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Caching;
 using System.Web.Mvc;
+using System.Web.Mvc.Async;
 using System.Web.Routing;
 
 namespace HybridServer
@@ -64,29 +68,39 @@ namespace HybridServer
                 if (Statics.HSSettings.TryGetValue(ProviderUtility.Impure2Pure(key), out HSSettings hSSettings))
                     if (hSSettings.HSCache.TryGetValue(key, out HSCache hSCache))
                     {
-                        if (hSCache.UtcExpiry > DateTime.UtcNow)
-                            outputCacheEntry = hSCache.OutputCacheEntry;
-                        else
+                        outputCacheEntry = hSCache.OutputCacheEntry;
+
+                        if (hSCache.UtcExpiry < DateTime.UtcNow && !hSCache.IsReloding)
                         {
-                            Task.Factory.StartNew((context) =>
+                            string absoluteUri = Statics.Request.Url.AbsoluteUri;
+
+                            Task.Factory.StartNew(() =>
                             {
-                                HttpContext copied = (HttpContext)context;
+                                HttpRequest httpRequest = new HttpRequest("", absoluteUri, "");
+                                StringWriter stringWriter = new StringWriter();
+                                HttpResponse httpResponse = new HttpResponse(stringWriter);
+                                HttpContext httpContextMock = new HttpContext(httpRequest, httpResponse);
 
-                                hSSettings.QueueTasker.Add(() =>
-                                {
-                                    RouteData routeData = RouteUtils.GetRouteDataByUrl(copied.Request.AppRelativeCurrentExecutionFilePath);
+                                RouteData routeData = RouteUtils.GetRouteDataByUrl(httpContextMock.Request.AppRelativeCurrentExecutionFilePath);
 
-                                    var factory = DependencyResolver.Current.GetService<IControllerFactory>() ?? new DefaultControllerFactory();
-                                    Controller controller = (Controller)factory.CreateController(copied.Request.RequestContext, routeData.Values["controller"].ToString());
+                                var factory = DependencyResolver.Current.GetService<IControllerFactory>() ?? new DefaultControllerFactory();
+                                Controller controller = (Controller)factory.CreateController(httpContextMock.Request.RequestContext, routeData.Values["controller"].ToString());
 
+                                ControllerContext newContext = new ControllerContext(new HttpContextWrapper(httpContextMock), routeData, controller);
 
-                                    ControllerContext newContext = new ControllerContext(new HttpContextWrapper(copied), routeData, controller);
-                                    controller.ControllerContext = newContext;
-                                    controller.ActionInvoker.InvokeAction(controller.ControllerContext, routeData.Values["action"].ToString());
+                                controller.ControllerContext = newContext;
+                                HttpContext.Current = httpContextMock;
 
-                                    Set(key, ProviderUtility.GetSnapShot(copied), DateTime.UtcNow.AddSeconds(10));
-                                });
-                            }, HttpContext.Current);
+                                var tctr = httpContextMock.Response.GetType();
+
+                                var v1 = tctr.GetMethods(Statics.bf).FirstOrDefault(m => m.Name == "InitResponseWriter");
+
+                                var v2 = v1.Invoke(httpContextMock.Response, null);
+
+                                bool isAction = (controller.ActionInvoker as AsyncControllerActionInvoker)
+                                .InvokeAction(controller.ControllerContext, routeData.Values["action"].ToString());
+                                Set(key, ProviderUtility.GetSnapShot(httpContextMock), DateTime.UtcNow.AddSeconds(10));
+                            });
                         }
                     }
 
@@ -100,10 +114,6 @@ namespace HybridServer
         }
         public override void Set(string key, object entry, DateTime utcExpiry)
         {
-            if (entry is List<ResponseElement>)
-            {
-
-            }
             if (Statics.HSSettings.TryGetValue(ProviderUtility.Impure2Pure(key), out HSSettings hSSettings))
             {
                 hSSettings.QueueTasker.Add(() =>

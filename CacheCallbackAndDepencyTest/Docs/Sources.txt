@@ -40,7 +40,7 @@ ControllerContext newContext = new ControllerContext(new HttpContextWrapper(Syst
 controller.ControllerContext = newContext;
 ActionResult result = controller.Test();
 ---------------------------------------------------------------------------------------------------------------------------
-
+https://stackoverflow.com/Questions/1452418/how-do-i-mock-the-httpcontext-in-asp-net-mvc-using-moq
 
 
 

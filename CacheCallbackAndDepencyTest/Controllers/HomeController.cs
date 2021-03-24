@@ -24,14 +24,14 @@ namespace CacheCallbackAndDepencyTest.Controllers
 
 
 
-        [OutputCache(Duration = 10, VaryByParam = "*")]
+        [OutputCacheSpec(Duration = 10, VaryByParam = "*")]
         public ActionResult Frame2()
         {
             Thread.Sleep(5000);
             return View();
         }
 
-        [OutputCache(Duration = 60000, VaryByParam = "*")]
+        [OutputCacheSpec(Duration = 60000, VaryByParam = "*")]
         public ActionResult Frame3() => View();
 
 
