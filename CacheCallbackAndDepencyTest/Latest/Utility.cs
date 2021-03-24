@@ -84,7 +84,7 @@ namespace HybridServer
                     fileStream.Dispose();
             }
         }
-        internal static string PathMap(params string[] vs) => Statics.Server.MapPath(Path.Combine(vs));
+        internal static string PathMap(HttpContext httpContext, params string[] vs) => httpContext.Server.MapPath(Path.Combine(vs));
         internal static string PathCombine(params string[] vs) => Path.Combine(vs);
         internal static string CreateFileName() => Guid.NewGuid().ToString() + Statics.defaultFileExtesion;
         internal static string KeyCrypte(string @string)
@@ -103,8 +103,8 @@ namespace HybridServer
     }
     internal class ProviderUtility
     {
-        internal static string Impure2Pure(string impureKey) => string.Concat(impureKey.Split(new string[] { ToLower(Statics.Request.Path) }, StringSplitOptions.None).First(), ToLower(Statics.Request.Path));
-        internal static bool IsFirstPick(string key) => key.Split(new string[] { ToLower(Statics.Request.Path) }, StringSplitOptions.None).Last().Length == 0;
+        internal static string Impure2Pure(HttpContext httpContext, string impureKey) => string.Concat(impureKey.Split(new string[] { ToLower(httpContext.Request.Path) }, StringSplitOptions.None).First(), ToLower(httpContext.Request.Path));
+        internal static bool IsFirstPick(HttpContext httpContext, string key) => key.Split(new string[] { ToLower(httpContext.Request.Path) }, StringSplitOptions.None).Last().Length == 0;
         internal static string ToLower(string text) => CultureInfo.InvariantCulture.TextInfo.ToLower(text);
         internal static void CollectorRun(int milliSecond)
         {
@@ -117,18 +117,45 @@ namespace HybridServer
 
                         for (int i = 0; i < vs.Length; i++)
                         {
-                            if (vs[i].Value.isChange)
+                            HSSettings settings = vs[i].Value;
+                            if (settings.isChange)
                             {
-                                vs[i].Value.isChange = false;
+                                settings.isChange = false;
 
-                                IOUtility.Serialize(vs[i].Value.PhysicalPath, vs[i].Value);
+                                IOUtility.Serialize(settings.PhysicalPath, settings);
+
+                                string[] subFolders = Directory.GetDirectories(settings.RootPath);
+
+                                foreach (string subFolder in subFolders)
+                                {
+                                    string[] files = Directory.GetFiles(subFolder);
+
+                                    DateTime newestDate = DateTime.MinValue;
+
+                                    string newestFile = string.Empty;
+
+                                    foreach (string file in files)
+                                    {
+                                        FileInfo fileInfo = new FileInfo(file);
+                                        if (fileInfo.LastWriteTime > newestDate)
+                                        {
+                                            newestDate = fileInfo.LastWriteTime;
+                                            newestFile = file;
+                                        }
+                                    }
+
+                                    files = files.Where(f => f != newestFile).ToArray();
+
+                                    foreach (string file in files)
+                                        File.Delete(file);
+                                }
                             }
                         }
                         Thread.Sleep(milliSecond);
                     } while (true);
                 });
         }
-        internal static Task<HttpContext> RequestClone()
+        internal static Task<HttpContext> RequestClone(HttpContext httpContext)
         {
             return Task.Factory.StartNew((obj) =>
             {
@@ -169,7 +196,7 @@ namespace HybridServer
                     routeData.Values["action"].ToString());
 
                 return httpContext;
-            }, new Uri(Statics.Request.Url.OriginalString));
+            }, new Uri(httpContext.Request.Url.OriginalString));
         }
         internal static object GetSnapShot(HttpContext context)
         {

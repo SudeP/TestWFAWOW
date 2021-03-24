@@ -1,8 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 using System.Threading.Tasks;
-using System.Web;
-using System.Web.Routing;
 
 namespace HybridServer
 {
@@ -35,11 +33,5 @@ namespace HybridServer
             | BindingFlags.SetProperty
             | BindingFlags.Static
             | BindingFlags.SuppressChangeType;
-        internal static HttpContext Context => HttpContext.Current;
-        internal static HttpApplication Application => Context.ApplicationInstance;
-        internal static HttpServerUtility Server => Context.Server;
-        internal static HttpResponse Response => Context.Response;
-        internal static HttpRequest Request => Context.Request;
-        internal static RequestContext RequestContext => Request.RequestContext;
     }
 }

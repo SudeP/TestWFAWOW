@@ -1,23 +1,26 @@
 ﻿using System;
+using System.Web;
 using System.Web.Caching;
 
 namespace HybridServer
 {
     internal sealed class OutputCacheHybridServerProvider : OutputCacheProvider
     {
+        private HttpContext httpContext;
         public OutputCacheHybridServerProvider() => ProviderUtility.CollectorRun(Statics.oneMinute);
         public override object Add(string key, object entry, DateTime utcExpiry) => Statics.HSSettings.AddOrUpdate(
                 key,
-                _ => new HSSettings(key, entry),
-                (_, oldHSSettings) => oldHSSettings.CachedVary != null ? oldHSSettings : oldHSSettings.Update(key, entry))
+                _ => new HSSettings(httpContext, key, entry),
+                (_, oldHSSettings) => oldHSSettings.CachedVary != null ? oldHSSettings : oldHSSettings.Update(httpContext, key, entry))
             .CachedVary;
         public override object Get(string key)
         {
-            if (ProviderUtility.IsFirstPick(key))
+            httpContext = HttpContext.Current;
+            if (ProviderUtility.IsFirstPick(httpContext, key))
             {
                 HSSettings hSSettings = Statics.HSSettings.GetOrAdd(
                     key,
-                    k => new HSSettings(k, null));
+                    k => new HSSettings(httpContext, k, null));
 
                 return hSSettings.CachedVary;
             }
@@ -26,7 +29,7 @@ namespace HybridServer
                 object outputCacheEntry = null;
 
                 if (
-                    Statics.HSSettings.TryGetValue(ProviderUtility.Impure2Pure(key), out HSSettings hSSettings)
+                    Statics.HSSettings.TryGetValue(ProviderUtility.Impure2Pure(httpContext, key), out HSSettings hSSettings)
                     &&
                     hSSettings.HSCache.TryGetValue(key, out HSCache hSCache))
                 {
@@ -35,22 +38,25 @@ namespace HybridServer
                     if (hSCache.UtcExpiry < DateTime.UtcNow && !hSCache.IsReloding)
                     {
                         hSCache.IsReloding = true;
-                        ProviderUtility.RequestClone()
-                            .ContinueWith((task) => Set(key, ProviderUtility.GetSnapShot(task.Result), DateTime.UtcNow.AddSeconds(10)));
+                        ProviderUtility.RequestClone(httpContext)
+                            .ContinueWith((task) =>
+                            {
+                                httpContext = task.Result;
+                                Set(key, ProviderUtility.GetSnapShot(httpContext), httpContext.Response.Cache.GetExpires());
+                            });
                     }
                 }
-
                 return outputCacheEntry;
             }
         }
         public override void Remove(string key)
         {
-            if (!ProviderUtility.IsFirstPick(key) && Statics.HSSettings.TryGetValue(ProviderUtility.Impure2Pure(key), out HSSettings hSSettings))
+            if (!ProviderUtility.IsFirstPick(httpContext, key) && Statics.HSSettings.TryGetValue(ProviderUtility.Impure2Pure(httpContext, key), out HSSettings hSSettings))
                 hSSettings.TryRemove(key);
         }
         public override void Set(string key, object entry, DateTime utcExpiry)
         {
-            if (Statics.HSSettings.TryGetValue(ProviderUtility.Impure2Pure(key), out HSSettings hSSettings))
+            if (Statics.HSSettings.TryGetValue(ProviderUtility.Impure2Pure(httpContext, key), out HSSettings hSSettings))
             {
                 hSSettings.QueueTasker.Add(() =>
                 {
@@ -63,6 +69,7 @@ namespace HybridServer
                         (_, oldHSCache) => oldHSCache.UtcExpiry > DateTime.UtcNow ? oldHSCache : oldHSCache.Update(key, entry, utcExpiry, hSSettings));
 
                     IOUtility.Serialize(hSCache.PhysicalPath, hSCache.OutputCacheEntry);
+                    hSCache.IsReloding = false;
                 });
             }
         }

@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Web;
 
 namespace HybridServer
 {
     [Serializable]
     internal class HSSettings
     {
-        internal HSSettings(string key, object cachedVary) => Update(key, cachedVary);
-        internal HSSettings Update(string key, object cachedVary)
+        internal HSSettings(HttpContext httpContext, string key, object cachedVary) => Update(httpContext, key, cachedVary);
+        internal HSSettings Update(HttpContext httpContext, string key, object cachedVary)
         {
             if (QueueTasker != null)
                 GC.SuppressFinalize(QueueTasker);
             QueueTasker = new QueueTasker();
 
-            RootPath = IOUtility.PathMap(Statics.defaultCacheRegion, IOUtility.KeyCrypte(key));
+            RootPath = IOUtility.PathMap(httpContext, Statics.defaultCacheRegion, IOUtility.KeyCrypte(key));
 
             if (!Directory.Exists(RootPath))
                 Directory.CreateDirectory(RootPath);

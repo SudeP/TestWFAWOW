@@ -18,7 +18,6 @@ namespace HybridServer
                 OutputCacheEntry.GetType()
                     .GetField("_responseElements", Statics.bf)
                     .SetValue(OutputCacheEntry, outputCacheEntry);
-                IsReloding = false;
             }
             else
             {
@@ -42,7 +41,8 @@ namespace HybridServer
         }
         [NonSerialized]
         private HSSettings hSSettings;
-        internal bool IsReloding { get; set; }
+        [NonSerialized]
+        internal bool IsReloding;
         internal string RootPath { get; private set; }
         internal string PhysicalPath { get; private set; }
         internal object OutputCacheEntry { get; private set; }
