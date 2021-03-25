@@ -1,9 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Caching;
+using System.Web.Mvc;
+using System.Web.Routing;
 
 namespace HybridServer
 {
@@ -38,26 +41,36 @@ namespace HybridServer
                 {
                     outputCacheEntry = hSCache.OutputCacheEntry;
 
+
+
+                    HttpContext empty = ProviderUtility.CloneContext(httpContext);
+
+                    /*
+                    ApplicationInstance null
+                    CurrentNotification null
+                    IsCustomErrorEnabled true
+                    IsPostNotification null
+                    IsWebSocketRequest null
+                    WebSocketRequestedProtocols null
+
+                     */
+
+                    HttpContext bind = ReflectionUtility
+                        .Bind(
+                            httpContext,
+                            ProviderUtility.EmptyContext(httpContext.Request.Url));
+
                     if (hSCache.UtcExpiry < DateTime.UtcNow && !hSCache.IsReloding)
                     {
                         hSCache.IsReloding = true;
                         ProviderUtility
-                            .InvokeRequest(
-                                ReflectionUtility
-                                    .Bind(
-                                        httpContext,
-                                        ProviderUtility.EmptyContext(httpContext.Request.Url)))
+                            .InvokeRequest(bind)
                                 .ContinueWith((t) =>
                                 {
                                     httpContext = t.Result;
                                     Set(key, ProviderUtility.GetSnapShot(httpContext), httpContext.Response.Cache.GetExpires());
                                 });
                     }
-
-
-                    // RUNTIME DAKI PROJEDEN RESULTEXECINTDEKİ PROCESS METHODUNDAN EXCEPTION VEREBILECEK YERLERI BUL
-                    // RESPONSE METHODUYLA ALAKASINI BUL.
-                    // ÇÖZ VE BİTSİN
 
                     //if (hSCache.UtcExpiry < DateTime.UtcNow && !hSCache.IsReloding)
                     //{
