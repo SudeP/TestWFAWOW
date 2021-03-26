@@ -270,7 +270,7 @@ namespace HybridServer
     }
     internal static class ReflectionUtility
     {
-        internal static T2 Bind<T1, T2>(this T1 from, T2 to)
+        internal static T2 Bind<T1, T2>(this T1 from, T2 to, params string[] ignoreNames)
             where T1 : class
             where T2 : class
         {
@@ -283,7 +283,7 @@ namespace HybridServer
             foreach (PropertyInfo toProperty in toProperties)
             {
                 PropertyInfo requestSettingsProperty = fromType.GetProperty(toProperty.Name);
-                if (requestSettingsProperty != null && requestSettingsProperty.PropertyType == toProperty.PropertyType)
+                if (requestSettingsProperty != null && requestSettingsProperty.PropertyType == toProperty.PropertyType && !ignoreNames.Contains(toProperty.Name))
                     try
                     {
                         toProperty.SetValue(to, requestSettingsProperty.GetValue(from));
@@ -298,7 +298,7 @@ namespace HybridServer
             foreach (FieldInfo toField in toFields)
             {
                 FieldInfo requestSettingsField = fromType.GetField(toField.Name, Statics.bf);
-                if (requestSettingsField != null && requestSettingsField.FieldType == toField.FieldType)
+                if (requestSettingsField != null && requestSettingsField.FieldType == toField.FieldType && !ignoreNames.Contains(toField.Name))
                     try
                     {
                         toField.SetValue(to, requestSettingsField.GetValue(from));

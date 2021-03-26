@@ -10,7 +10,7 @@ namespace CacheCallbackAndDepencyTest.Controllers
         protected new ViewResult View([CallerMemberName] string name = null)
         {
             Debug.WriteLine(MethodBase.GetCurrentMethod().GetFullName());
-            return View(name, "~/Views/Layout.cshtml");
+            return View(name, null/*, "~/Views/Layout.cshtml"*/);
         }
     }
 }

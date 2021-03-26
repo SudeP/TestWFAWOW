@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -41,28 +42,20 @@ namespace HybridServer
                 {
                     outputCacheEntry = hSCache.OutputCacheEntry;
 
-
-
-                    HttpContext empty = ProviderUtility.CloneContext(httpContext);
-
-                    /*
-                    ApplicationInstance null
-                    CurrentNotification null
-                    IsCustomErrorEnabled true
-                    IsPostNotification null
-                    IsWebSocketRequest null
-                    WebSocketRequestedProtocols null
-
-                     */
-
-                    HttpContext bind = ReflectionUtility
-                        .Bind(
-                            httpContext,
-                            ProviderUtility.EmptyContext(httpContext.Request.Url));
-
                     if (hSCache.UtcExpiry < DateTime.UtcNow && !hSCache.IsReloding)
                     {
                         hSCache.IsReloding = true;
+
+                        HttpContext empty = ProviderUtility.CloneContext(httpContext);
+
+                        HttpContext bind = ReflectionUtility.Bind(httpContext, empty, "Request", "_request", "Response", "_response");
+
+                        HttpRequest bindRequest = ReflectionUtility.Bind(httpContext.Request, empty.Request, "_wr");
+                        HttpResponse bindResponse = ReflectionUtility.Bind(httpContext.Response, empty.Response, "_wr", "_writer", "_httpWriter");
+
+                        bind.GetType().GetField("_request", Statics.bf).SetValue(bind, bindRequest);
+                        bind.GetType().GetField("_response", Statics.bf).SetValue(bind, bindResponse);
+
                         ProviderUtility
                             .InvokeRequest(bind)
                                 .ContinueWith((t) =>
@@ -71,19 +64,6 @@ namespace HybridServer
                                     Set(key, ProviderUtility.GetSnapShot(httpContext), httpContext.Response.Cache.GetExpires());
                                 });
                     }
-
-                    //if (hSCache.UtcExpiry < DateTime.UtcNow && !hSCache.IsReloding)
-                    //{
-                    //    hSCache.IsReloding = true;
-                    //    ProviderUtility
-                    //        .InvokeRequest(
-                    //            ProviderUtility.CloneContext(httpContext))
-                    //        .ContinueWith((task) =>
-                    //        {
-                    //            httpContext = task.Result;
-                    //            Set(key, ProviderUtility.GetSnapShot(httpContext), httpContext.Response.Cache.GetExpires());
-                    //        });
-                    //}
                 }
                 return outputCacheEntry;
             }
